@@ -8,16 +8,16 @@ import {
 
 export const userRoute = async (app: FastifyInstance) => {
   app.post(
-    '/user',
+    '/users',
     createUserSchema,
     async (request, reply) => await userController.create(request, reply)
   )
 
-  app.get('/user', listUsersSchema, (request, reply) =>
+  app.get('/users', listUsersSchema, (request, reply) =>
     userController.list(request, reply)
   )
 
-  app.get('/user/:id', getUserByIdSchema, (request, reply) =>
+  app.get('/users/:id', getUserByIdSchema, (request, reply) =>
     userController.getById(request, reply)
   )
 }
