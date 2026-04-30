@@ -12,7 +12,12 @@ const errorResponseSchema = z.object({
 })
 
 const createUserBodySchema = z.object({
-  name: z.string().min(3).max(50),
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Nome é obrigatório')
+    .min(3, 'Nome deve ter pelo menos 3 caracteres')
+    .max(50, 'Nome deve ter no máximo 50 caracteres'),
 })
 
 export const createUserSchema: RouteShorthandOptions = {
