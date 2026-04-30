@@ -1,0 +1,59 @@
+import type { RouteShorthandOptions } from 'fastify'
+import { z } from 'zod'
+
+const gameResponseSchema = z.object({
+  id: z.string(),
+  team_a: z.string(),
+  team_b: z.string(),
+  fase: z.string(),
+  data_hora: z.string().datetime(),
+  gols_a: z.number().nullable(),
+  gols_b: z.number().nullable(),
+  finish_game: z.boolean(),
+  created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
+})
+
+const errorResponseSchema = z.object({
+  message: z.string(),
+})
+
+const paramsSchema = z.object({
+  id: z.string(),
+})
+
+const querySchema = z.object({
+  fase: z
+    .enum(['GRUPOS', 'OITAVAS', 'QUARTAS', 'SEMI', 'FINAL', 'TERCEIRO'])
+    .optional(),
+  status: z.enum(['FUTURO', 'ENCERRADO']).optional(),
+})
+
+export const listGamesSchema: RouteShorthandOptions = {
+  schema: {
+    summary: 'Lista todos os jogos',
+    description: 'Lista jogos com opção de filtrar por fase ou status',
+    tags: ['Jogos'],
+    querystring: querySchema,
+    response: {
+      200: z.array(gameResponseSchema),
+      400: errorResponseSchema,
+      404: errorResponseSchema,
+      500: errorResponseSchema,
+    },
+  },
+}
+
+export const getGameByIdSchema: RouteShorthandOptions = {
+  schema: {
+    summary: 'Busca jogo por ID',
+    tags: ['Jogos'],
+    params: paramsSchema,
+    response: {
+      200: gameResponseSchema,
+      404: errorResponseSchema,
+      400: errorResponseSchema,
+      500: errorResponseSchema,
+    },
+  },
+}
