@@ -13,16 +13,15 @@ const errorResponseSchema = z.object({
 
 const createUserBodySchema = z.object({
   name: z
-    .string()
-    .trim()
-    .min(1, 'Nome é obrigatório')
+    .string({ error: 'Nome é obrigatório' })
     .min(3, 'Nome deve ter pelo menos 3 caracteres')
-    .max(50, 'Nome deve ter no máximo 50 caracteres'),
+    .max(50, 'Nome deve ter no máximo 50 caracteres')
+    .trim(),
 })
 
 export const createUserSchema: RouteShorthandOptions = {
   schema: {
-    summary: 'Criar novo usuário',
+    summary: 'Cria novo usuário',
     tags: ['Usuários'],
     body: createUserBodySchema,
     response: {
@@ -35,7 +34,7 @@ export const createUserSchema: RouteShorthandOptions = {
 
 export const listUsersSchema: RouteShorthandOptions = {
   schema: {
-    summary: 'Listar todos os usuários',
+    summary: 'Lista todos os usuários',
     tags: ['Usuários'],
     response: {
       200: z.array(userResponseSchema),
@@ -47,7 +46,7 @@ export const listUsersSchema: RouteShorthandOptions = {
 
 export const getUserByIdSchema: RouteShorthandOptions = {
   schema: {
-    summary: 'Buscar usuário por ID',
+    summary: 'Busca usuário por ID',
     tags: ['Usuários'],
     params: z.object({
       id: z.string(),
