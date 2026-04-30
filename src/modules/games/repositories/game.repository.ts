@@ -1,4 +1,4 @@
-import { eq, gt } from 'drizzle-orm'
+import { count, eq, gt } from 'drizzle-orm'
 import { db } from '../../../db/connection'
 import { games } from '../../../db/schemas/games'
 import type {
@@ -61,5 +61,10 @@ export class GameRepository implements IGameRepository {
       .where(eq(games.id, id))
       .returning()
     return result[0]
+  }
+
+  async contarTotalJogos(): Promise<number> {
+    const result = await db.select({ count: count() }).from(games)
+    return result[0]?.count ?? 0
   }
 }

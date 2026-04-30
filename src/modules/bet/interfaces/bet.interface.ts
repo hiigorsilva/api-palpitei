@@ -42,6 +42,7 @@ export interface IBetRepository {
   getByGame(gameId: string): Promise<IBet[]>
   getBetByUserGame(userId: string, gameId: string): Promise<IBet | null>
   verifyIfUserHasBet(userId: string, gameId: string): Promise<boolean>
+  contarJogosDistintosApostados(userId: string): Promise<number>
 }
 
 export interface IBetService {

@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm'
+import { and, countDistinct, eq } from 'drizzle-orm'
 import { db } from '../../../db/connection'
 import { bet } from '../../../db/schemas/bet'
 import { games } from '../../../db/schemas/games'
@@ -119,5 +119,13 @@ export class BetRepository implements IBetRepository {
   async verifyIfUserHasBet(userId: string, gameId: string): Promise<boolean> {
     const betData = await this.getBetByUserGame(userId, gameId)
     return betData !== null
+  }
+
+  async contarJogosDistintosApostados(userId: string): Promise<number> {
+    const result = await db
+      .select({ count: countDistinct(bet.gameId) })
+      .from(bet)
+      .where(eq(bet.userId, userId))
+    return result[0]?.count ?? 0
   }
 }

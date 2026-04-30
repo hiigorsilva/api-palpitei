@@ -33,4 +33,5 @@ export interface IGameRepository {
   listByFase(fase: GameFase): Promise<IGame[]>
   listByStatus(status: GameStatus): Promise<IGame[]>
   updateResult(id: string, gols_a: number, gols_b: number): Promise<IGame>
+  contarTotalJogos(): Promise<number>
 }
