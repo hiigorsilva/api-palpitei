@@ -21,6 +21,8 @@ const listParamsSchema = z.object({
   userId: z.string(),
 })
 
+const palpiteOptions = ['A', 'B', 'EMPATE'] as const
+
 export class BetController {
   constructor(
     private betService: BetService,
@@ -30,6 +32,18 @@ export class BetController {
   async create(request: FastifyRequest, reply: FastifyReply) {
     const params = createParamsSchema.parse(request.params)
     const body = CreateBetDTOSchema.parse(request.body)
+
+    if (!params.userId) {
+      return reply.status(400).send({ message: 'ID do usuário é obrigatório' })
+    }
+
+    if (!params.gameId) {
+      return reply.status(400).send({ message: 'ID do jogo é obrigatório' })
+    }
+
+    if (body.palpite && !palpiteOptions.includes(body.palpite)) {
+      return reply.status(400).send({ message: 'Palpite inválido' })
+    }
 
     const bet = await this.betService.createBet(
       params.userId,

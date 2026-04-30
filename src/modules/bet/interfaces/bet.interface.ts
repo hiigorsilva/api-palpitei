@@ -24,8 +24,6 @@ export const palpiteSchema = z.enum(['A', 'B', 'EMPATE'])
 export type Palpite = z.infer<typeof palpiteSchema>
 
 export const CreateBetDTOSchema = z.object({
-  userId: z.string(),
-  gameId: z.string(),
   palpite: palpiteSchema,
 })
 
