@@ -8,8 +8,8 @@ export const registerSwagger = (app: FastifyInstance) => {
   app.register(fastifySwagger, {
     openapi: {
       info: {
-        title: 'SaaS Finance API',
-        description: 'API documentation for SaaS Finance application',
+        title: 'Palpitei API',
+        description: 'API do sistema de bolão para Copa do Mundo',
         version: '1.0.0',
       },
       servers: [
@@ -19,10 +19,11 @@ export const registerSwagger = (app: FastifyInstance) => {
       ],
       components: {
         securitySchemes: {
-          bearerAuth: {
+          basicAuth: {
             type: 'http',
-            scheme: 'bearer',
-            bearerFormat: 'JWT',
+            scheme: 'basic',
+            description:
+              'Autenticação Basic Auth - Use usuário: admin / senha: palpitei2026',
           },
         },
       },

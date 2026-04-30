@@ -34,6 +34,12 @@ export const EditBetDTOSchema = z.object({
 export type CreateBetDTO = z.infer<typeof CreateBetDTOSchema>
 export type EditBetDTO = z.infer<typeof EditBetDTOSchema>
 
+export interface IEstatisticasUsuario {
+  acertos: number
+  total_apostas: number
+  pontos_apostas: number
+}
+
 export interface IBetRepository {
   create(userId: string, gameId: string, palpite: Palpite): Promise<IBet>
   update(id: number, palpite: Palpite): Promise<IBet>
@@ -43,6 +49,9 @@ export interface IBetRepository {
   getBetByUserGame(userId: string, gameId: string): Promise<IBet | null>
   verifyIfUserHasBet(userId: string, gameId: string): Promise<boolean>
   contarJogosDistintosApostados(userId: string): Promise<number>
+  getEstatisticasPorUsuario(
+    userId: string
+  ): Promise<IEstatisticasUsuario | null>
 }
 
 export interface IBetService {

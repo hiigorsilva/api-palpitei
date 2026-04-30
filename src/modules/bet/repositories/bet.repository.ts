@@ -1,4 +1,4 @@
-import { and, countDistinct, eq } from 'drizzle-orm'
+import { and, count, countDistinct, eq, sql } from 'drizzle-orm'
 import { db } from '../../../db/connection'
 import { bet } from '../../../db/schemas/bet'
 import { games } from '../../../db/schemas/games'
@@ -7,6 +7,7 @@ import type {
   IBet,
   IBetFull,
   IBetRepository,
+  IEstatisticasUsuario,
   Palpite,
 } from '../interfaces/bet.interface'
 import { palpiteSchema } from '../interfaces/bet.interface'
@@ -127,5 +128,24 @@ export class BetRepository implements IBetRepository {
       .from(bet)
       .where(eq(bet.userId, userId))
     return result[0]?.count ?? 0
+  }
+
+  async getEstatisticasPorUsuario(
+    userId: string
+  ): Promise<IEstatisticasUsuario | null> {
+    const result = await db
+      .select({
+        acertos: sql<number>`cast(count(*) filter (where ${bet.acertou} = true) as int)`,
+        total_apostas: count(),
+      })
+      .from(bet)
+      .where(eq(bet.userId, userId))
+    const row = result[0]
+    if (!row || row.total_apostas === 0) return null
+    return {
+      acertos: row.acertos,
+      total_apostas: row.total_apostas,
+      pontos_apostas: row.acertos * 3,
+    }
   }
 }

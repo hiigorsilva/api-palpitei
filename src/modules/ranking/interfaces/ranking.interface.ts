@@ -23,7 +23,7 @@ export interface IBonusRepository {
   getBonusUsuario(userId: string): Promise<{ bonus_concedido: number } | null>
 }
 
-export interface IApostaRepository {
+export interface IBetRepository {
   getEstatisticasPorUsuario(userId: string): Promise<{
     acertos: number
     total_apostas: number
