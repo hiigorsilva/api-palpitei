@@ -1,12 +1,12 @@
 import type { FastifyInstance } from 'fastify'
 import { basicAuth } from '../../admin/auth/auth'
+import { integrationController } from '../instances/integration.instance'
 import {
   syncAllSchema,
   syncGamesSchema,
   syncTeamsSchema,
   updateResultsSchema,
 } from '../schemas/integration.schema'
-import { integrationController } from './instance'
 
 export async function integrationRoute(app: FastifyInstance) {
   // Todas as rotas protegidas (apenas admin)

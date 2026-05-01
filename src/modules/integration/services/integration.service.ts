@@ -1,9 +1,14 @@
-import {
-  type IApiFixture,
-  IGameDTO,
-  type IIntegrationConfig,
-} from './interface'
-import type { IntegrationRepository } from './repository'
+import type { GameFase } from '../../games/interfaces/game.interface'
+import type {
+  IApiEnvelope,
+  IApiFixture,
+  IApiFixturesResponse,
+  IApiTeamsResponse,
+  IIntegrationConfig,
+  IIntegrationGameDTO,
+  IIntegrationTeamDTO,
+} from '../interfaces/integration.interface'
+import type { IntegrationRepository } from '../repositories/integration.repositoy'
 
 export class IntegrationService {
   private apiUrl: string
@@ -21,10 +26,14 @@ export class IntegrationService {
     this.season = config.season
   }
 
-  private async fetchFromAPI(
+  private async fetchFromAPI<TResponse>(
     endpoint: string,
     params: Record<string, string> = {}
-  ): Promise<any> {
+  ): Promise<TResponse> {
+    if (!this.apiKey) {
+      throw new Error('API_FOOTBALL_KEY não configurada')
+    }
+
     const url = new URL(`${this.apiUrl}${endpoint}`)
     Object.entries(params).forEach(([key, value]) => {
       url.searchParams.append(key, value)
@@ -40,22 +49,32 @@ export class IntegrationService {
       throw new Error(`API Error: ${response.status} ${response.statusText}`)
     }
 
-    const data = await response.json()
+    const data = (await response.json()) as IApiEnvelope<TResponse>
     if (data.errors && Object.keys(data.errors).length > 0) {
       throw new Error(`API Error: ${JSON.stringify(data.errors)}`)
     }
 
-    return data
+    return data.response
   }
 
-  private determinarFase(round: string): string {
+  private determinarFase(round: string): GameFase {
     const roundLower = round.toLowerCase()
-    if (roundLower.includes('group')) return 'grupos'
-    if (roundLower.includes('round of 16')) return 'oitavas'
-    if (roundLower.includes('quarter')) return 'quartas'
-    if (roundLower.includes('semi')) return 'semi'
-    if (roundLower.includes('final')) return 'final'
-    return 'grupos'
+    if (roundLower.includes('group')) return 'GRUPOS'
+    if (roundLower.includes('round of 32') || roundLower.includes('1/16')) {
+      return '32_AVOS'
+    }
+    if (roundLower.includes('round of 16') || roundLower.includes('1/8')) {
+      return 'OITAVAS'
+    }
+    if (roundLower.includes('quarter') || roundLower.includes('1/4')) {
+      return 'QUARTAS'
+    }
+    if (roundLower.includes('semi')) return 'SEMI'
+    if (roundLower.includes('third') || roundLower.includes('3rd')) {
+      return 'TERCEIRO'
+    }
+    if (roundLower.includes('final')) return 'FINAL'
+    return 'GRUPOS'
   }
 
   private isJogoEncerrado(status: string): boolean {
@@ -64,62 +83,83 @@ export class IntegrationService {
   }
 
   async sincronizarTimes(): Promise<number> {
-    const response = await this.fetchFromAPI('/teams', {
-      league: this.leagueId.toString(),
-      season: this.season.toString(),
-    })
+    const response = await this.fetchFromAPI<IApiTeamsResponse['response']>(
+      '/teams',
+      {
+        league: this.leagueId.toString(),
+        season: this.season.toString(),
+      }
+    )
 
     let count = 0
-    for (const item of response.response) {
-      const apiTeam = item.team
+    for (const item of response) {
+      const teamData: IIntegrationTeamDTO = {
+        apiId: item.team.id,
+        name: item.team.name,
+        code: item.team.code,
+        logo: item.team.logo,
+      }
+
       const existente = await this.integrationRepository.buscarTimePorApiId(
-        apiTeam.id
+        teamData.apiId
       )
 
-      if (!existente) {
-        await this.integrationRepository.criarTime({
-          apiId: apiTeam.id,
-          nome: apiTeam.name,
-          sigla: apiTeam.code || apiTeam.name.substring(0, 3).toUpperCase(),
-          logo: apiTeam.logo,
-        })
-        count++
+      if (existente) {
+        await this.integrationRepository.atualizarTime(teamData.apiId, teamData)
+      } else {
+        await this.integrationRepository.criarTime(teamData)
       }
+
+      count++
     }
 
     return count
   }
 
   async sincronizarJogos(): Promise<number> {
-    const response = await this.fetchFromAPI('/fixtures', {
-      league: this.leagueId.toString(),
-      season: this.season.toString(),
-    })
+    const response = await this.fetchFromAPI<IApiFixturesResponse['response']>(
+      '/fixtures',
+      {
+        league: this.leagueId.toString(),
+        season: this.season.toString(),
+      }
+    )
 
     let count = 0
-    for (const item of response.response as IApiFixture[]) {
+    for (const item of response as IApiFixture[]) {
       const fixture = item.fixture
       const teams = item.teams
       const goals = item.goals
       const round = item.league.round
 
-      const existente = await this.integrationRepository.buscarJogoPorApiId(
-        fixture.id
-      )
+      const jogoData: IIntegrationGameDTO = {
+        apiId: fixture.id,
+        team_a: teams.home.name,
+        team_b: teams.away.name,
+        fase: this.determinarFase(round),
+        data_hora: new Date(fixture.date),
+        gols_a: goals.home,
+        gols_b: goals.away,
+        finish_game: this.isJogoEncerrado(fixture.status.short),
+      }
 
-      if (!existente) {
-        await this.integrationRepository.criarJogo({
-          apiId: fixture.id,
-          selecao_a_id: teams.home.id,
-          selecao_b_id: teams.away.id,
-          fase: this.determinarFase(round),
-          data_hora: new Date(fixture.date),
-          gols_a: goals.home,
-          gols_b: goals.away,
-          encerrado: this.isJogoEncerrado(fixture.status.short),
-          api_status: fixture.status.short,
-        })
+      const existentePorApiId =
+        await this.integrationRepository.buscarJogoPorApiId(jogoData.apiId)
+      const existentePorConfronto =
+        await this.integrationRepository.buscarJogoPorConfrontoEData(
+          jogoData.team_a,
+          jogoData.team_b,
+          jogoData.data_hora
+        )
+
+      if (!existentePorApiId && !existentePorConfronto) {
+        await this.integrationRepository.criarJogo(jogoData)
         count++
+      } else if (!existentePorApiId && existentePorConfronto) {
+        await this.integrationRepository.vincularApiIdJogo(
+          existentePorConfronto.id,
+          jogoData.apiId
+        )
       }
     }
 
@@ -135,29 +175,56 @@ export class IntegrationService {
     const dateFrom = ontem.toISOString().split('T')[0]
     const dateTo = hoje.toISOString().split('T')[0]
 
-    const response = await this.fetchFromAPI('/fixtures', {
-      league: this.leagueId.toString(),
-      season: this.season.toString(),
-      from: dateFrom,
-      to: dateTo,
-    })
+    const response = await this.fetchFromAPI<IApiFixturesResponse['response']>(
+      '/fixtures',
+      {
+        league: this.leagueId.toString(),
+        season: this.season.toString(),
+        from: dateFrom,
+        to: dateTo,
+      }
+    )
 
     let count = 0
-    for (const item of response.response as IApiFixture[]) {
+    for (const item of response as IApiFixture[]) {
       const fixture = item.fixture
+      const teams = item.teams
       const goals = item.goals
 
       // Só processar jogos que terminaram
       if (this.isJogoEncerrado(fixture.status.short)) {
-        const existente = await this.integrationRepository.buscarJogoPorApiId(
-          fixture.id
-        )
+        const dataHora = new Date(fixture.date)
+        const existentePorApiId =
+          await this.integrationRepository.buscarJogoPorApiId(fixture.id)
+        const existentePorConfronto =
+          await this.integrationRepository.buscarJogoPorConfrontoEData(
+            teams.home.name,
+            teams.away.name,
+            dataHora
+          )
+        const existente = existentePorApiId ?? existentePorConfronto
 
-        if (existente) {
-          await this.integrationRepository.atualizarJogo(fixture.id, {
+        if (
+          existentePorConfronto &&
+          !existentePorApiId &&
+          !existentePorConfronto.apiId
+        ) {
+          await this.integrationRepository.vincularApiIdJogo(
+            existentePorConfronto.id,
+            fixture.id
+          )
+        }
+
+        if (
+          existente &&
+          (!existente.finish_game ||
+            existente.gols_a !== goals.home ||
+            existente.gols_b !== goals.away)
+        ) {
+          await this.integrationRepository.atualizarJogo(existente.id, {
             gols_a: goals.home,
             gols_b: goals.away,
-            encerrado: true,
+            finish_game: true,
           })
           count++
         }
