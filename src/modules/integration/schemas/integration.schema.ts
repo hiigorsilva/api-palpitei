@@ -1,28 +1,20 @@
 import type { RouteShorthandOptions } from 'fastify'
+import { z } from 'zod'
 
-const syncResponseSchema = {
-  type: 'object',
-  properties: {
-    message: { type: 'string' },
-    times_sincronizados: { type: 'number' },
-    jogos_sincronizados: { type: 'number' },
-  },
-}
+const syncResponseSchema = z.object({
+  message: z.string(),
+  times_sincronizados: z.number(),
+  jogos_sincronizados: z.number(),
+})
 
-const updateResponseSchema = {
-  type: 'object',
-  properties: {
-    message: { type: 'string' },
-    jogos_atualizados: { type: 'number' },
-  },
-}
+const updateResponseSchema = z.object({
+  message: z.string(),
+  jogos_atualizados: z.number(),
+})
 
-const errorResponseSchema = {
-  type: 'object',
-  properties: {
-    message: { type: 'string' },
-  },
-}
+const errorResponseSchema = z.object({
+  message: z.string(),
+})
 
 export const syncTeamsSchema: RouteShorthandOptions = {
   schema: {
