@@ -1,3 +1,4 @@
+import { isValidId } from '../../../shared/utils/helpers'
 import type { ICreateUserDTO, IUser } from '../interfaces/user.interface'
 import type { UserRepository } from '../repositories/user.repository'
 
@@ -5,17 +6,34 @@ export class UserService {
   constructor(private userRepository: UserRepository) {}
 
   async createUser(data: ICreateUserDTO): Promise<IUser> {
-    if (!data.name || data.name.trim().length === 0) {
-      throw new Error('Nome é obrigatório')
+    const name = data.name.trim()
+
+    if (!data.name || name.length === 0) {
+      throw { statusCode: 400, message: 'Nome é obrigatório' }
     }
 
-    if (data.name.trim().length < 3) {
-      throw new Error('Nome deve ter pelo menos 3 caracteres')
+    if (name.length < 3) {
+      throw {
+        statusCode: 400,
+        message: 'Nome deve ter pelo menos 3 caracteres',
+      }
     }
 
-    const alreadyExists = await this.userRepository.findByName(data.name.trim())
-    if (alreadyExists) throw new Error('Nome já está em uso')
-    return await this.userRepository.create(data.name.trim())
+    const alreadyExists = await this.userRepository.findByName(name)
+    if (alreadyExists) {
+      throw { statusCode: 400, message: 'Nome já está em uso' }
+    }
+    try {
+      return await this.userRepository.create(name)
+    } catch (error: any) {
+      if (
+        error.code === '23505' ||
+        error.message.includes('unique constraint')
+      ) {
+        throw { statusCode: 400, message: 'Este nome já está em uso' }
+      }
+      throw error
+    }
   }
 
   async listUsers(): Promise<IUser[]> {
@@ -23,7 +41,14 @@ export class UserService {
   }
 
   async getUserById(userId: string): Promise<IUser | null> {
-    if (!userId) throw new Error('ID do usuário é obrigatório')
+    if (!userId) {
+      throw { statusCode: 400, message: 'ID do usuário é obrigatório' }
+    }
+
+    if (!isValidId(userId)) {
+      throw { statusCode: 400, message: 'ID do usuário inválido' }
+    }
+
     return await this.userRepository.findById(userId)
   }
 }

@@ -24,9 +24,17 @@ const paramsSchema = z.object({
 
 const querySchema = z.object({
   fase: z
-    .enum(['GRUPOS', 'OITAVAS', 'QUARTAS', 'SEMI', 'FINAL', 'TERCEIRO'])
+    .enum(['GRUPOS', 'OITAVAS', 'QUARTAS', 'SEMI', 'FINAL', 'TERCEIRO'], {
+      error:
+        'Fase inválida. Informe a fase correta: GRUPOS, 32-AVOS, OITAVAS, QUARTAS, SEMI, FINAL ou TERCEIRO',
+    })
     .optional(),
-  status: z.enum(['FUTURO', 'ENCERRADO']).optional(),
+  status: z
+    .enum(['FUTURO', 'ENCERRADO'], {
+      error:
+        'Status inválido. Informe se é um jogo FUTURO ou se já está ENCERRADO',
+    })
+    .optional(),
 })
 
 export const listGamesSchema: RouteShorthandOptions = {

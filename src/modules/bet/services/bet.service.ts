@@ -1,3 +1,4 @@
+import { isValidId } from '../../../shared/utils/helpers'
 import type { GameRepository } from '../../games/repositories/game.repository'
 import type { UserRepository } from '../../users/repositories/user.repository'
 import type { IBet, Palpite } from '../interfaces/bet.interface'
@@ -28,6 +29,16 @@ export class BetService {
     gameId: string,
     palpite: Palpite
   ): Promise<IBet> {
+    // Verificar se o ID do jogo é válido (uuid)
+    if (!isValidId(gameId)) {
+      throw { statusCode: 400, message: 'ID do jogo inválido' }
+    }
+
+    // Verificar se o ID do usuário é válido (uuid)
+    if (!isValidId(userId)) {
+      throw { statusCode: 400, message: 'ID do usuário inválido' }
+    }
+
     const user = await this.userRepository.findById(userId)
     if (!user) {
       throw { statusCode: 404, message: 'Usuário não encontrado' }
@@ -60,6 +71,11 @@ export class BetService {
     palpite: Palpite,
     dataHoraGame: Date
   ): Promise<IBet> {
+    // Verificar se o ID do usuário é válido (uuid)
+    if (!isValidId(userId)) {
+      throw { statusCode: 400, message: 'ID do usuário inválido' }
+    }
+
     const existingBet = await this.betRepository.getById(id)
     if (!existingBet) {
       throw { statusCode: 404, message: 'Aposta não encontrada' }

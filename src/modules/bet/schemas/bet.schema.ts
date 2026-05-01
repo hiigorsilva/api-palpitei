@@ -33,12 +33,16 @@ const errorResponseSchema = z.object({
 })
 
 const createBetBodyBodySchema = z.object({
-  palpite: z.enum(['A', 'B', 'EMPATE']),
+  palpite: z.enum(['A', 'B', 'EMPATE'], {
+    error: 'Palpite inválido. Informe os valores corretos: A, B ou EMPATE',
+  }),
 })
 
 const editBetBodySchema = z.object({
   gameId: z.string(),
-  palpite: z.enum(['A', 'B', 'EMPATE']),
+  palpite: z.enum(['A', 'B', 'EMPATE'], {
+    error: 'Palpite inválido. Informe os valores corretos: A, B ou EMPATE',
+  }),
 })
 
 const createBetParamsSchema = z.object({

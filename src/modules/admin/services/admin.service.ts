@@ -25,15 +25,15 @@ export class AdminService {
   private determinarResultado(
     gols_a: number,
     gols_b: number
-  ): 'A' | 'B' | 'empate' {
+  ): 'A' | 'B' | 'EMPATE' {
     if (gols_a > gols_b) return 'A'
     if (gols_b > gols_a) return 'B'
-    return 'empate'
+    return 'EMPATE'
   }
 
   private verificarAcerto(
     palpite: string,
-    resultado: 'A' | 'B' | 'empate'
+    resultado: 'A' | 'B' | 'EMPATE'
   ): boolean {
     return palpite === resultado
   }

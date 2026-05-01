@@ -3,8 +3,8 @@ import { z } from 'zod'
 
 const resultadoBodySchema = z.object({
   gameId: z.string(),
-  gols_a: z.number().min(0),
-  gols_b: z.number().min(0),
+  gols_a: z.number().min(0, 'Os gols não podem ser negativos'),
+  gols_b: z.number().min(0, 'Os gols não podem ser negativos'),
 })
 
 const recalcularResponseSchema = z.object({
