@@ -1,3 +1,5 @@
+import { validate } from 'uuid'
+
 export function formatPercentWithoutSymbol(value: number, precision = 2) {
   const formattedValue = Number(value)
   const percentValue = new Intl.NumberFormat('pt-BR', {
@@ -7,4 +9,9 @@ export function formatPercentWithoutSymbol(value: number, precision = 2) {
   }).format(formattedValue)
 
   return percentValue.replaceAll('%', '').replaceAll(',', '.')
+}
+
+export const isValidId = (id: string) => {
+  const value = id.trim()
+  return validate(value)
 }

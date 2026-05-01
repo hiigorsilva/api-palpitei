@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { db } from '../../../db/connection'
 import { ranking } from '../../../db/schemas/ranking'
+import { isValidId } from '../../../shared/utils/helpers'
 import type { BetRepository } from '../../bet/repositories/bet.repository'
 import type { BonusService } from '../../bonus-progresso/services/bonus-progresso.service'
 import type { GameRepository } from '../../games/repositories/game.repository'
@@ -38,6 +39,11 @@ export class AdminService {
   }
 
   async atualizarResultado(data: IResultadoDTO): Promise<{ message: string }> {
+    // Verificar se o ID do jogo é válido (uuid)
+    if (!isValidId(data.gameId)) {
+      throw { statusCode: 400, message: 'ID do jogo inválido' }
+    }
+
     // Verificar se jogo existe
     const game = await this.gameRepository.getById(data.gameId)
     if (!game) {

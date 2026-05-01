@@ -25,11 +25,11 @@ CREATE TABLE "games" (
 );
 --> statement-breakpoint
 CREATE TABLE "bonus_participacao" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
 	"jogos_apostados" integer DEFAULT 0 NOT NULL,
-	"percentual" integer DEFAULT 0,
-	"nivel" "nivel" DEFAULT 'INICIANTE',
+	"percentual" integer DEFAULT 0 NOT NULL,
+	"nivel" "nivel" DEFAULT 'INICIANTE' NOT NULL,
 	"bonus_concedido" integer DEFAULT 0 NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,

@@ -70,14 +70,14 @@ export class AdminRepository {
     const usuariosComApostas = await db
       .select({ count: count() })
       .from(users)
-      .where(sql`EXISTS (SELECT 1 FROM bet WHERE bet.userId = users.id)`)
+      .where(sql`EXISTS (SELECT 1 FROM bet WHERE bet.user_id = users.id)`)
 
     const mediaApostas = await db
       .select({
         media: sql<number>`ROUND(AVG(apostas_count), 2)`,
       })
       .from(
-        sql`(SELECT userId, COUNT(*) as apostas_count FROM bet GROUP BY userId) as sub`
+        sql`(SELECT user_id, COUNT(*) as apostas_count FROM bet GROUP BY user_id) as sub`
       )
 
     return {

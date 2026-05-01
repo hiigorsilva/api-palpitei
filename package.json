@@ -11,6 +11,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:push": "npx drizzle-kit push",
+    "db:drop": "npx drizzle-kit drop",
+    "db:deletemigrations": "rm -rf src/db/migrations/*",
     "prepare": "husky"
   },
   "keywords": [],
@@ -30,6 +32,7 @@
     "fastify": "^5.8.5",
     "fastify-type-provider-zod": "^6.1.0",
     "pg": "^8.20.0",
+    "uuid": "^14.0.0",
     "zod": "^4.4.0"
   },
   "devDependencies": {

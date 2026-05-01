@@ -1,5 +1,5 @@
 {
-  "id": "dcf961fe-e3d4-4c2e-83f6-1a79f3a8069f",
+  "id": "a9a29a4b-42f7-45d0-85fb-9cd27b3e9108",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -229,9 +229,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "name": "user_id",
@@ -250,7 +251,7 @@
           "name": "percentual",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": 0
         },
         "nivel": {
@@ -258,7 +259,7 @@
           "type": "nivel",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "'INICIANTE'"
         },
         "bonus_concedido": {
