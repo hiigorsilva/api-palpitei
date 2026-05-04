@@ -88,6 +88,32 @@ export class AdminService {
     )
   }
 
+  private parseGroup(
+    value: string
+  ): 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' {
+    const group = value.trim().toUpperCase()
+    if (
+      !['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'].includes(
+        group
+      )
+    ) {
+      throw { statusCode: 400, message: `Grupo inválido no JSON: ${value}` }
+    }
+    return group as
+      | 'A'
+      | 'B'
+      | 'C'
+      | 'D'
+      | 'E'
+      | 'F'
+      | 'G'
+      | 'H'
+      | 'I'
+      | 'J'
+      | 'K'
+      | 'L'
+  }
+
   private async _aplicarResultadoJogo(
     data: IResultadoDTO
   ): Promise<{ team_a: string; team_b: string }> {
@@ -400,6 +426,7 @@ export class AdminService {
     const teamsData = JSON.parse(teamsJson) as Array<{
       name: string
       fifa_code?: string
+      group: string
     }>
     const matchesData = JSON.parse(matchesJson) as {
       matches: Array<{
@@ -416,8 +443,13 @@ export class AdminService {
     let teamsIgnorados = 0
 
     for (const [index, team] of teamsData.entries()) {
+      const teamGroup = this.parseGroup(team.group)
       const exists = await this.adminRepository.buscarTeamPorNome(team.name)
       if (exists) {
+        await this.adminRepository.atualizarGrupoTeamPorNome(
+          team.name,
+          teamGroup
+        )
         teamsIgnorados++
         continue
       }
@@ -427,6 +459,7 @@ export class AdminService {
         name: team.name,
         code: team.fifa_code ?? null,
         logo: null,
+        group: teamGroup,
       })
       teamsInseridos++
     }

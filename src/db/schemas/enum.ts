@@ -18,3 +18,18 @@ export const nivelEnum = pgEnum('nivel', [
   'PLATINA',
   'DIAMANTE',
 ])
+
+export const grupoEnum = pgEnum('grupo', [
+  'A',
+  'B',
+  'C',
+  'D',
+  'E',
+  'F',
+  'G',
+  'H',
+  'I',
+  'J',
+  'K',
+  'L',
+])

@@ -15,6 +15,13 @@
       "when": 1777662487703,
       "tag": "0001_quiet_bromley",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777921839940,
+      "tag": "0002_curious_spectrum",
+      "breakpoints": true
     }
   ]
 }

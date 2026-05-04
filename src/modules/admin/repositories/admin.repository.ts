@@ -20,13 +20,28 @@ export class AdminRepository {
     name: string
     code: string | null
     logo: string | null
+    group: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L'
   }): Promise<void> {
     await db.insert(teams).values({
       apiId: data.apiId,
       name: data.name,
       code: data.code,
       logo: data.logo,
+      group: data.group,
     })
+  }
+
+  async atualizarGrupoTeamPorNome(
+    name: string,
+    group: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L'
+  ): Promise<void> {
+    await db
+      .update(teams)
+      .set({
+        group,
+        updated_at: new Date(),
+      })
+      .where(eq(teams.name, name))
   }
 
   async buscarJogoPorApiId(apiId: number): Promise<{ id: string } | null> {
