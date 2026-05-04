@@ -6,12 +6,12 @@ const gameResponseSchema = z.object({
   team_a: z.string(),
   team_b: z.string(),
   fase: z.string(),
-  data_hora: z.string().datetime(),
+  data_hora: z.union([z.string().datetime(), z.date()]),
   gols_a: z.number().nullable(),
   gols_b: z.number().nullable(),
   finish_game: z.boolean(),
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
+  created_at: z.union([z.string().datetime(), z.date()]),
+  updated_at: z.union([z.string().datetime(), z.date()]),
 })
 
 const errorResponseSchema = z.object({
