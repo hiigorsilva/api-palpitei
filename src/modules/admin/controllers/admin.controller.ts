@@ -1,6 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
-import { GameFaseSchema } from '../../games/interfaces/game.interface'
 import {
   AtualizarParticipantesBodySchema,
   AtualizarParticipantesLoteSchema,
@@ -71,22 +70,6 @@ export class AdminController {
     const result =
       await this.adminService.inserirMultiplosResultados(resultados)
     return reply.status(200).send(result)
-  }
-
-  async listarJogosPendentes(_request: FastifyRequest, reply: FastifyReply) {
-    const games = await this.adminService.listarJogosPendentes()
-    return reply.status(200).send(games)
-  }
-
-  async listarJogosDeHoje(_request: FastifyRequest, reply: FastifyReply) {
-    const games = await this.adminService.listarJogosDeHoje()
-    return reply.status(200).send(games)
-  }
-
-  async listarJogosPorFase(request: FastifyRequest, reply: FastifyReply) {
-    const query = z.object({ fase: GameFaseSchema }).parse(request.query)
-    const games = await this.adminService.listarJogosPorFase(query.fase)
-    return reply.status(200).send(games)
   }
 
   async recalcularPontuacao(_request: FastifyRequest, reply: FastifyReply) {

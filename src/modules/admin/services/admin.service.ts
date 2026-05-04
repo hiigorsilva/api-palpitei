@@ -7,7 +7,7 @@ import { ranking } from '../../../db/schemas/ranking'
 import { isValidId } from '../../../shared/utils/helpers'
 import type { BetRepository } from '../../bet/repositories/bet.repository'
 import type { BonusService } from '../../bonus-progresso/services/bonus-progresso.service'
-import type { GameFase, IGame } from '../../games/interfaces/game.interface'
+import type { GameFase } from '../../games/interfaces/game.interface'
 import type { GameRepository } from '../../games/repositories/game.repository'
 import type { RankingRepository } from '../../ranking/repositories/ranking.repository'
 import type {
@@ -350,18 +350,6 @@ export class AdminService {
     return {
       message: `Resultado do jogo ${game.team_a} x ${game.team_b} corrigido com sucesso`,
     }
-  }
-
-  async listarJogosPendentes(): Promise<IGame[]> {
-    return await this.gameRepository.listPendentes()
-  }
-
-  async listarJogosDeHoje(): Promise<IGame[]> {
-    return await this.gameRepository.listHoje()
-  }
-
-  async listarJogosPorFase(fase: GameFase): Promise<IGame[]> {
-    return await this.gameRepository.listByFase(fase)
   }
 
   async atualizarParticipantesJogoManual(

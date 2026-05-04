@@ -8,9 +8,6 @@ import {
   corrigirResultadoSchema,
   getDashboardSchema,
   inserirLoteResultadosSchema,
-  listarJogosDeHojeSchema,
-  listarJogosPendentesSchema,
-  listarJogosPorFaseSchema,
   popularBaseLocalSchema,
   recalcularPontuacaoSchema,
 } from '../schemas/admin.schema'
@@ -52,21 +49,6 @@ export async function adminRoute(app: FastifyInstance) {
     inserirLoteResultadosSchema,
     (request, reply) =>
       adminController.inserirMultiplosResultados(request, reply)
-  )
-
-  // Consultas de jogos
-  app.get(
-    '/admin/jogos/pendentes',
-    listarJogosPendentesSchema,
-    (request, reply) => adminController.listarJogosPendentes(request, reply)
-  )
-
-  app.get('/admin/jogos/hoje', listarJogosDeHojeSchema, (request, reply) =>
-    adminController.listarJogosDeHoje(request, reply)
-  )
-
-  app.get('/admin/jogos/fase', listarJogosPorFaseSchema, (request, reply) =>
-    adminController.listarJogosPorFase(request, reply)
   )
 
   // Utilitários

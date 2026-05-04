@@ -6,19 +6,6 @@ const security = [{ basicAuth: [] }]
 const errorResponseSchema = z.object({ message: z.string() })
 const messageResponseSchema = z.object({ message: z.string() })
 
-const gameResponseSchema = z.object({
-  id: z.string(),
-  team_a: z.string(),
-  team_b: z.string(),
-  fase: z.string(),
-  data_hora: z.coerce.date(),
-  gols_a: z.number().nullable(),
-  gols_b: z.number().nullable(),
-  finish_game: z.boolean(),
-  created_at: z.coerce.date(),
-  updated_at: z.coerce.date(),
-})
-
 export const popularBaseLocalSchema: RouteShorthandOptions = {
   schema: {
     summary: 'Popula banco com JSON local',
@@ -178,66 +165,6 @@ export const inserirLoteResultadosSchema: RouteShorthandOptions = {
           })
         ),
       }),
-      400: errorResponseSchema,
-      401: errorResponseSchema,
-      500: errorResponseSchema,
-    },
-  },
-}
-
-// GET /admin/jogos/pendentes
-export const listarJogosPendentesSchema: RouteShorthandOptions = {
-  schema: {
-    summary: 'Lista jogos sem resultado',
-    description:
-      'Admin: retorna todos os jogos com finish_game=false, ordenados por data',
-    tags: ['Admin'],
-    security,
-    response: {
-      200: z.array(gameResponseSchema),
-      401: errorResponseSchema,
-      500: errorResponseSchema,
-    },
-  },
-}
-
-// GET /admin/jogos/hoje
-export const listarJogosDeHojeSchema: RouteShorthandOptions = {
-  schema: {
-    summary: 'Lista jogos de hoje (UTC)',
-    description:
-      'Admin: retorna jogos cuja data_hora está dentro do dia atual em UTC',
-    tags: ['Admin'],
-    security,
-    response: {
-      200: z.array(gameResponseSchema),
-      401: errorResponseSchema,
-      500: errorResponseSchema,
-    },
-  },
-}
-
-// GET /admin/jogos/fase
-export const listarJogosPorFaseSchema: RouteShorthandOptions = {
-  schema: {
-    summary: 'Lista jogos filtrados por fase',
-    description:
-      'Admin: filtra jogos pelo enum de fase (GRUPOS, 32_AVOS, OITAVAS, QUARTAS, SEMI, TERCEIRO, FINAL)',
-    tags: ['Admin'],
-    security,
-    querystring: z.object({
-      fase: z.enum([
-        'GRUPOS',
-        '32_AVOS',
-        'OITAVAS',
-        'QUARTAS',
-        'SEMI',
-        'TERCEIRO',
-        'FINAL',
-      ]),
-    }),
-    response: {
-      200: z.array(gameResponseSchema),
       400: errorResponseSchema,
       401: errorResponseSchema,
       500: errorResponseSchema,

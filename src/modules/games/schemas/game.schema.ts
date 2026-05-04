@@ -68,3 +68,27 @@ export const getGameByIdSchema: RouteShorthandOptions = {
     },
   },
 }
+
+export const listPendingGamesSchema: RouteShorthandOptions = {
+  schema: {
+    summary: 'Lista jogos pendentes',
+    description: 'Lista jogos sem resultado (finish_game=false)',
+    tags: ['Jogos'],
+    response: {
+      200: z.array(gameResponseSchema),
+      500: errorResponseSchema,
+    },
+  },
+}
+
+export const listTodayGamesSchema: RouteShorthandOptions = {
+  schema: {
+    summary: 'Lista jogos de hoje',
+    description: 'Lista jogos do dia atual em UTC',
+    tags: ['Jogos'],
+    response: {
+      200: z.array(gameResponseSchema),
+      500: errorResponseSchema,
+    },
+  },
+}

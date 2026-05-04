@@ -49,4 +49,14 @@ export class GameController {
     const game = await this.gameService.getById(params.id)
     return reply.status(200).send(game)
   }
+
+  async listPendentes(_request: FastifyRequest, reply: FastifyReply) {
+    const games = await this.gameService.listPendentes()
+    return reply.status(200).send(games)
+  }
+
+  async listHoje(_request: FastifyRequest, reply: FastifyReply) {
+    const games = await this.gameService.listHoje()
+    return reply.status(200).send(games)
+  }
 }

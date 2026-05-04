@@ -23,4 +23,12 @@ export class GameService {
   async listByStatus(status: GameStatus): Promise<IGame[]> {
     return await this.gameRepository.listByStatus(status)
   }
+
+  async listPendentes(): Promise<IGame[]> {
+    return await this.gameRepository.listPendentes()
+  }
+
+  async listHoje(): Promise<IGame[]> {
+    return await this.gameRepository.listHoje()
+  }
 }
