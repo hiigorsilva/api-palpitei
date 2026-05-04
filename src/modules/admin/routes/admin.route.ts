@@ -2,6 +2,8 @@ import type { FastifyInstance } from 'fastify'
 import { basicAuth } from '../auth/auth'
 import { adminController } from '../instances/admin.instance'
 import {
+  atualizarParticipantesJogoSchema,
+  atualizarParticipantesLoteSchema,
   atualizarResultadoSchema,
   corrigirResultadoSchema,
   getDashboardSchema,
@@ -18,6 +20,20 @@ export async function adminRoute(app: FastifyInstance) {
 
   app.post('/admin/popular-base', popularBaseLocalSchema, (request, reply) =>
     adminController.popularBaseLocal(request, reply)
+  )
+
+  app.put(
+    '/admin/jogos/:gameId/participantes',
+    atualizarParticipantesJogoSchema,
+    (request, reply) =>
+      adminController.atualizarParticipantesJogoManual(request, reply)
+  )
+
+  app.put(
+    '/admin/jogos/participantes/lote',
+    atualizarParticipantesLoteSchema,
+    (request, reply) =>
+      adminController.atualizarParticipantesLoteManual(request, reply)
   )
 
   // Resultados

@@ -11,6 +11,7 @@ import type { GameFase, IGame } from '../../games/interfaces/game.interface'
 import type { GameRepository } from '../../games/repositories/game.repository'
 import type { RankingRepository } from '../../ranking/repositories/ranking.repository'
 import type {
+  IAtualizarParticipantesLoteResponse,
   IDashboardResponse,
   ILoteResultadoItem,
   ILoteResultadoResponse,
@@ -121,6 +122,65 @@ export class AdminService {
     }
 
     return { team_a: game.team_a, team_b: game.team_b }
+  }
+
+  private _validarFaseEliminatoria(fase: GameFase): void {
+    if (fase === 'GRUPOS') {
+      throw {
+        statusCode: 400,
+        message:
+          'Atualização manual de participantes é permitida apenas no mata-mata.',
+      }
+    }
+  }
+
+  private async _atualizarParticipantesJogo(
+    gameId: string,
+    team_a: string,
+    team_b: string
+  ): Promise<void> {
+    if (!isValidId(gameId)) {
+      throw { statusCode: 400, message: 'ID do jogo inválido' }
+    }
+
+    if (team_a === team_b) {
+      throw {
+        statusCode: 400,
+        message: 'As seleções devem ser diferentes',
+      }
+    }
+
+    const game = await this.gameRepository.getById(gameId)
+    if (!game) {
+      throw { statusCode: 404, message: 'Jogo não encontrado' }
+    }
+
+    if (game.finish_game) {
+      throw {
+        statusCode: 400,
+        message: 'Não é possível alterar participantes de jogo encerrado',
+      }
+    }
+
+    this._validarFaseEliminatoria(game.fase as GameFase)
+
+    const [teamAExists, teamBExists] = await Promise.all([
+      this.adminRepository.existeSelecaoPorNome(team_a),
+      this.adminRepository.existeSelecaoPorNome(team_b),
+    ])
+
+    if (!teamAExists || !teamBExists) {
+      throw {
+        statusCode: 404,
+        message: 'Uma ou mais seleções não existem na base',
+      }
+    }
+
+    await this.adminRepository.atualizarParticipantesJogo(
+      gameId,
+      team_a,
+      team_b
+    )
   }
 
   async atualizarResultado(data: IResultadoDTO): Promise<{ message: string }> {
@@ -276,6 +336,52 @@ export class AdminService {
 
   async listarJogosPorFase(fase: GameFase): Promise<IGame[]> {
     return await this.gameRepository.listByFase(fase)
+  }
+
+  async atualizarParticipantesJogoManual(
+    gameId: string,
+    team_a: string,
+    team_b: string
+  ): Promise<{ message: string }> {
+    await this._atualizarParticipantesJogo(gameId, team_a, team_b)
+    return { message: 'Participantes atualizados com sucesso' }
+  }
+
+  async atualizarParticipantesLoteManual(
+    jogos: Array<{ gameId: string; team_a: string; team_b: string }>
+  ): Promise<IAtualizarParticipantesLoteResponse> {
+    const detalhes: IAtualizarParticipantesLoteResponse['detalhes'] = []
+    let sucesso = 0
+    let erros = 0
+
+    for (const jogo of jogos) {
+      try {
+        await this._atualizarParticipantesJogo(
+          jogo.gameId,
+          jogo.team_a,
+          jogo.team_b
+        )
+        sucesso++
+        detalhes.push({
+          gameId: jogo.gameId,
+          status: 'ok',
+          message: 'Participantes atualizados com sucesso',
+        })
+      } catch (err: unknown) {
+        erros++
+        const msg =
+          err && typeof err === 'object' && 'message' in err
+            ? String((err as { message: unknown }).message)
+            : 'Erro desconhecido'
+        detalhes.push({
+          gameId: jogo.gameId,
+          status: 'erro',
+          message: msg,
+        })
+      }
+    }
+
+    return { sucesso, erros, detalhes }
   }
 
   async popularBaseLocal(): Promise<IPopularBaseResponse> {

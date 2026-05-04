@@ -40,6 +40,66 @@ export const popularBaseLocalSchema: RouteShorthandOptions = {
   },
 }
 
+export const atualizarParticipantesJogoSchema: RouteShorthandOptions = {
+  schema: {
+    summary: 'Atualiza participantes de um jogo do mata-mata',
+    description:
+      'Admin: substitui placeholders/seleções em um jogo eliminatório ainda não encerrado.',
+    tags: ['Admin'],
+    security,
+    params: z.object({ gameId: z.string().uuid() }),
+    body: z.object({
+      team_a: z.string().min(1),
+      team_b: z.string().min(1),
+    }),
+    response: {
+      200: messageResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
+      404: errorResponseSchema,
+      500: errorResponseSchema,
+    },
+  },
+}
+
+export const atualizarParticipantesLoteSchema: RouteShorthandOptions = {
+  schema: {
+    summary: 'Atualiza participantes em lote no mata-mata',
+    description:
+      'Admin: atualiza vários jogos eliminatórios de uma vez com status por item.',
+    tags: ['Admin'],
+    security,
+    body: z.object({
+      jogos: z
+        .array(
+          z.object({
+            gameId: z.string().uuid(),
+            team_a: z.string().min(1),
+            team_b: z.string().min(1),
+          })
+        )
+        .min(1)
+        .max(32),
+    }),
+    response: {
+      200: z.object({
+        sucesso: z.number(),
+        erros: z.number(),
+        detalhes: z.array(
+          z.object({
+            gameId: z.string(),
+            status: z.enum(['ok', 'erro']),
+            message: z.string(),
+          })
+        ),
+      }),
+      400: errorResponseSchema,
+      401: errorResponseSchema,
+      500: errorResponseSchema,
+    },
+  },
+}
+
 // POST /admin/resultado
 export const atualizarResultadoSchema: RouteShorthandOptions = {
   schema: {

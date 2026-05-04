@@ -2,6 +2,8 @@ import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 import { GameFaseSchema } from '../../games/interfaces/game.interface'
 import {
+  AtualizarParticipantesBodySchema,
+  AtualizarParticipantesLoteSchema,
   CorrigirResultadoDTOSchema,
   LoteResultadoDTOSchema,
   ResultadoDTOSchema,
@@ -15,6 +17,32 @@ export class AdminController {
 
   async popularBaseLocal(_request: FastifyRequest, reply: FastifyReply) {
     const result = await this.adminService.popularBaseLocal()
+    return reply.status(200).send(result)
+  }
+
+  async atualizarParticipantesJogoManual(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) {
+    const { gameId } = paramsGameIdSchema.parse(request.params)
+    const { team_a, team_b } = AtualizarParticipantesBodySchema.parse(
+      request.body
+    )
+    const result = await this.adminService.atualizarParticipantesJogoManual(
+      gameId,
+      team_a,
+      team_b
+    )
+    return reply.status(200).send(result)
+  }
+
+  async atualizarParticipantesLoteManual(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) {
+    const { jogos } = AtualizarParticipantesLoteSchema.parse(request.body)
+    const result =
+      await this.adminService.atualizarParticipantesLoteManual(jogos)
     return reply.status(200).send(result)
   }
 

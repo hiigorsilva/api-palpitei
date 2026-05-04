@@ -37,6 +37,29 @@ export class AdminRepository {
     return result[0] || null
   }
 
+  async existeSelecaoPorNome(name: string): Promise<boolean> {
+    const result = await db
+      .select({ id: teams.id })
+      .from(teams)
+      .where(eq(teams.name, name))
+    return result.length > 0
+  }
+
+  async atualizarParticipantesJogo(
+    gameId: string,
+    team_a: string,
+    team_b: string
+  ): Promise<void> {
+    await db
+      .update(games)
+      .set({
+        team_a,
+        team_b,
+        updated_at: new Date(),
+      })
+      .where(eq(games.id, gameId))
+  }
+
   async inserirJogo(data: {
     apiId: number
     team_a: string

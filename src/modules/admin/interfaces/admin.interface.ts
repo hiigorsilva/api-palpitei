@@ -76,3 +76,41 @@ export interface IPopularBaseResponse {
   jogos_inseridos: number
   jogos_ignorados: number
 }
+
+export const AtualizarParticipantesBodySchema = z.object({
+  team_a: z.string().min(1, 'Seleção A é obrigatória'),
+  team_b: z.string().min(1, 'Seleção B é obrigatória'),
+})
+
+export type AtualizarParticipantesBodyDTO = z.infer<
+  typeof AtualizarParticipantesBodySchema
+>
+
+export const AtualizarParticipantesLoteSchema = z.object({
+  jogos: z
+    .array(
+      z.object({
+        gameId: z.string().uuid('ID do jogo inválido'),
+        team_a: z.string().min(1, 'Seleção A é obrigatória'),
+        team_b: z.string().min(1, 'Seleção B é obrigatória'),
+      })
+    )
+    .min(1, 'Envie ao menos um jogo')
+    .max(32, 'Máximo de 32 jogos por requisição'),
+})
+
+export type AtualizarParticipantesLoteDTO = z.infer<
+  typeof AtualizarParticipantesLoteSchema
+>
+
+export interface IAtualizarParticipantesLoteResponseItem {
+  gameId: string
+  status: 'ok' | 'erro'
+  message: string
+}
+
+export interface IAtualizarParticipantesLoteResponse {
+  sucesso: number
+  erros: number
+  detalhes: IAtualizarParticipantesLoteResponseItem[]
+}
