@@ -34,4 +34,6 @@ export interface IGameRepository {
   listByStatus(status: GameStatus): Promise<IGame[]>
   updateResult(id: string, gols_a: number, gols_b: number): Promise<IGame>
   contarTotalJogos(): Promise<number>
+  listPendentes(): Promise<IGame[]>
+  listHoje(): Promise<IGame[]>
 }

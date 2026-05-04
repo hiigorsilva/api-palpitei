@@ -2,10 +2,65 @@ import { count, eq, sql } from 'drizzle-orm'
 import { db } from '../../../db/connection'
 import { bet } from '../../../db/schemas/bet'
 import { games } from '../../../db/schemas/games'
+import { teams } from '../../../db/schemas/teams'
 import { users } from '../../../db/schemas/users'
 import type { IDashboardResponse } from '../interfaces/admin.interface'
 
 export class AdminRepository {
+  async buscarTeamPorNome(name: string): Promise<{ id: string } | null> {
+    const result = await db
+      .select({ id: teams.id })
+      .from(teams)
+      .where(eq(teams.name, name))
+    return result[0] || null
+  }
+
+  async inserirTeam(data: {
+    apiId: number
+    name: string
+    code: string | null
+    logo: string | null
+  }): Promise<void> {
+    await db.insert(teams).values({
+      apiId: data.apiId,
+      name: data.name,
+      code: data.code,
+      logo: data.logo,
+    })
+  }
+
+  async buscarJogoPorApiId(apiId: number): Promise<{ id: string } | null> {
+    const result = await db
+      .select({ id: games.id })
+      .from(games)
+      .where(eq(games.apiId, apiId))
+    return result[0] || null
+  }
+
+  async inserirJogo(data: {
+    apiId: number
+    team_a: string
+    team_b: string
+    fase:
+      | 'GRUPOS'
+      | '32_AVOS'
+      | 'OITAVAS'
+      | 'QUARTAS'
+      | 'SEMI'
+      | 'TERCEIRO'
+      | 'FINAL'
+    data_hora: Date
+  }): Promise<void> {
+    await db.insert(games).values({
+      apiId: data.apiId,
+      team_a: data.team_a,
+      team_b: data.team_b,
+      fase: data.fase,
+      data_hora: data.data_hora,
+      finish_game: false,
+    })
+  }
+
   async atualizarResultadoJogo(
     gameId: string,
     gols_a: number,

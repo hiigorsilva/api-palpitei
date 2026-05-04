@@ -1,4 +1,4 @@
-import { count, eq, gt } from 'drizzle-orm'
+import { and, count, eq, gt, gte, lte } from 'drizzle-orm'
 import { db } from '../../../db/connection'
 import { games } from '../../../db/schemas/games'
 import type {
@@ -66,5 +66,44 @@ export class GameRepository implements IGameRepository {
   async contarTotalJogos(): Promise<number> {
     const result = await db.select({ count: count() }).from(games)
     return result[0]?.count ?? 0
+  }
+
+  async listPendentes(): Promise<IGame[]> {
+    return await db
+      .select()
+      .from(games)
+      .where(eq(games.finish_game, false))
+      .orderBy(games.data_hora)
+  }
+
+  async listHoje(): Promise<IGame[]> {
+    const hoje = new Date()
+    const inicio = new Date(
+      Date.UTC(
+        hoje.getUTCFullYear(),
+        hoje.getUTCMonth(),
+        hoje.getUTCDate(),
+        0,
+        0,
+        0,
+        0
+      )
+    )
+    const fim = new Date(
+      Date.UTC(
+        hoje.getUTCFullYear(),
+        hoje.getUTCMonth(),
+        hoje.getUTCDate(),
+        23,
+        59,
+        59,
+        999
+      )
+    )
+    return await db
+      .select()
+      .from(games)
+      .where(and(gte(games.data_hora, inicio), lte(games.data_hora, fim)))
+      .orderBy(games.data_hora)
   }
 }
