@@ -5,11 +5,13 @@ import { bonusProgressRoute } from '../modules/bonus-progresso/routes/bonus-prog
 import { gameRoute } from '../modules/games/routes/game.route'
 import { healthRoute } from '../modules/healths/routes/health.route'
 import { rankingRoute } from '../modules/ranking/routes/ranking.route'
+import { teamRoute } from '../modules/teams/routes/team.route'
 import { userRoute } from '../modules/users/routes/user.route'
 
 export const registerRoutes = (app: FastifyInstance) => {
   app.register(healthRoute, { prefix: '/api' })
   app.register(userRoute, { prefix: '/api' })
+  app.register(teamRoute, { prefix: '/api' })
 
   app.register(gameRoute, { prefix: '/api' })
   app.register(betRoute, { prefix: '/api' })
