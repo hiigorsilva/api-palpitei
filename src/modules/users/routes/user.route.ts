@@ -4,9 +4,14 @@ import {
   createUserSchema,
   getUserByIdSchema,
   listUsersSchema,
+  loginUserSchema,
 } from '../schemas/user.schema'
 
 export const userRoute = async (app: FastifyInstance) => {
+  app.post('/auth/login', loginUserSchema, async (request, reply) =>
+    userController.login(request, reply)
+  )
+
   app.post(
     '/users',
     createUserSchema,

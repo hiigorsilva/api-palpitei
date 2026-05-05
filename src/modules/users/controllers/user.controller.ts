@@ -18,6 +18,12 @@ export class UserController {
     return reply.status(201).send(user)
   }
 
+  async login(request: FastifyRequest, reply: FastifyReply) {
+    const body = request.body as CreateUserBody
+    const user = await this.userService.loginByName(body)
+    return reply.status(200).send(user)
+  }
+
   async list(_request: FastifyRequest, reply: FastifyReply) {
     const users = await this.userService.listUsers()
     return reply.status(200).send(users)

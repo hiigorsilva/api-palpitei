@@ -56,11 +56,6 @@ export interface IBetRepository {
 
 export interface IBetService {
   createBet(userId: string, gameId: string, palpite: Palpite): Promise<IBet>
-  updateBet(
-    id: number,
-    userId: string,
-    palpite: Palpite,
-    dataHoraJogo: Date
-  ): Promise<IBet>
-  listBetById(userId: string): Promise<IBetFull[]>
+  editBet(id: number, userId: string, palpite: Palpite): Promise<IBet>
+  listBetsByUser(userId: string): Promise<IBetFull[]>
 }

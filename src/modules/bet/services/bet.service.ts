@@ -68,8 +68,7 @@ export class BetService {
   async editBet(
     id: number,
     userId: string,
-    palpite: Palpite,
-    dataHoraGame: Date
+    palpite: Palpite
   ): Promise<IBet> {
     // Verificar se o ID do usuário é válido (uuid)
     if (!isValidId(userId)) {
@@ -88,7 +87,12 @@ export class BetService {
       }
     }
 
-    this.verificarPrazo(dataHoraGame)
+    const game = await this.gameRepository.getById(existingBet.gameId)
+    if (!game) {
+      throw { statusCode: 404, message: 'Jogo não encontrado' }
+    }
+
+    this.verificarPrazo(game.data_hora)
 
     return await this.betRepository.update(id, palpite)
   }

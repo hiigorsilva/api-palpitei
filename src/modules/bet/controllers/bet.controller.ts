@@ -1,6 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import z from 'zod'
-import type { GameService } from '../../games/services/game.service'
 import {
   CreateBetDTOSchema,
   EditBetDTOSchema,
@@ -24,10 +23,7 @@ const listParamsSchema = z.object({
 const palpiteOptions = ['A', 'B', 'EMPATE'] as const
 
 export class BetController {
-  constructor(
-    private betService: BetService,
-    private gameService: GameService
-  ) {}
+  constructor(private betService: BetService) {}
 
   async create(request: FastifyRequest, reply: FastifyReply) {
     const params = createParamsSchema.parse(request.params)
@@ -58,17 +54,10 @@ export class BetController {
     const params = editParamsSchema.parse(request.params)
     const body = EditBetDTOSchema.parse(request.body)
 
-    const game = await this.gameService.getById(params.id.toString())
-
-    if (!game) {
-      return reply.status(404).send({ message: 'Jogo não encontrado' })
-    }
-
     const bet = await this.betService.editBet(
       params.id,
       params.userId,
-      body.palpite,
-      game.data_hora
+      body.palpite
     )
 
     return reply.status(200).send(bet)

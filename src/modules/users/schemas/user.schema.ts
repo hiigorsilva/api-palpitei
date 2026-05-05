@@ -32,6 +32,21 @@ export const createUserSchema: RouteShorthandOptions = {
   },
 }
 
+export const loginUserSchema: RouteShorthandOptions = {
+  schema: {
+    summary: 'Entra no bolão pelo nome',
+    description:
+      'Busca um usuário pelo nome informado. Se não existir, cria automaticamente.',
+    tags: ['Autenticação'],
+    body: createUserBodySchema,
+    response: {
+      200: userResponseSchema,
+      400: errorResponseSchema,
+      500: errorResponseSchema,
+    },
+  },
+}
+
 export const listUsersSchema: RouteShorthandOptions = {
   schema: {
     summary: 'Lista todos os usuários',

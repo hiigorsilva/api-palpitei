@@ -5,10 +5,12 @@ import type { UserRepository } from '../repositories/user.repository'
 export class UserService {
   constructor(private userRepository: UserRepository) {}
 
-  async createUser(data: ICreateUserDTO): Promise<IUser> {
-    const name = data.name.trim()
+  private normalizeName(name: string): string {
+    return name.trim().replace(/\s+/g, ' ')
+  }
 
-    if (!data.name || name.length === 0) {
+  private validateName(name: string): void {
+    if (!name || name.length === 0) {
       throw { statusCode: 400, message: 'Nome é obrigatório' }
     }
 
@@ -18,6 +20,12 @@ export class UserService {
         message: 'Nome deve ter pelo menos 3 caracteres',
       }
     }
+  }
+
+  async createUser(data: ICreateUserDTO): Promise<IUser> {
+    const name = this.normalizeName(data.name)
+
+    this.validateName(name)
 
     const alreadyExists = await this.userRepository.findByName(name)
     if (alreadyExists) {
@@ -32,6 +40,29 @@ export class UserService {
       ) {
         throw { statusCode: 400, message: 'Este nome já está em uso' }
       }
+      throw error
+    }
+  }
+
+  async loginByName(data: ICreateUserDTO): Promise<IUser> {
+    const name = this.normalizeName(data.name)
+
+    this.validateName(name)
+
+    const alreadyExists = await this.userRepository.findByName(name)
+    if (alreadyExists) return alreadyExists
+
+    try {
+      return await this.userRepository.create(name)
+    } catch (error: any) {
+      if (
+        error.code === '23505' ||
+        error.message.includes('unique constraint')
+      ) {
+        const user = await this.userRepository.findByName(name)
+        if (user) return user
+      }
+
       throw error
     }
   }
