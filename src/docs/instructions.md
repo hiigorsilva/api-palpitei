@@ -8,7 +8,7 @@
 ## Exemplo de uso
 ### 1. Atualizar resultado
 ```bash
-curl -X POST http://localhost:3000/admin/resultado \
+curl -X POST $API_URL/admin/resultado \
   -u admin_user:admin_password \
   -H "Content-Type: application/json" \
   -d '{"jogo_id": 1, "gols_a": 2, "gols_b": 1}'
@@ -16,13 +16,13 @@ curl -X POST http://localhost:3000/admin/resultado \
   ---
   ### 2. Recalcular pontuação geral
 ```bash
-curl -X POST http://localhost:3000/admin/recalcular \
+curl -X POST $API_URL/admin/recalcular \
   -u admin_user:admin_password
 ```
 ---
 ### 3. Dashboard
 ```bash
-curl http://localhost:3000/admin/dashboard \
+curl $API_URL/admin/dashboard \
   -u admin_user:admin_password
 ```
 ---

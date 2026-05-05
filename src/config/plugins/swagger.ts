@@ -5,6 +5,8 @@ import { jsonSchemaTransform } from 'fastify-type-provider-zod'
 import { env } from '../../shared/utils/env'
 
 export const registerSwagger = (app: FastifyInstance) => {
+  const apiUrl = env.API_URL.replace(/\/+$/, '')
+
   app.register(fastifySwagger, {
     openapi: {
       info: {
@@ -14,7 +16,7 @@ export const registerSwagger = (app: FastifyInstance) => {
       },
       servers: [
         {
-          url: `http://localhost:${env.PORT}`,
+          url: apiUrl,
         },
       ],
       components: {
