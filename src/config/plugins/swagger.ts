@@ -34,7 +34,7 @@ export const registerSwagger = (app: FastifyInstance) => {
   })
 
   app.register(scalarFastifyApiReference, {
-    routePrefix: '/docs',
+    routePrefix: '/api/docs',
     configuration: {
       theme: 'bluePlanet',
     },
