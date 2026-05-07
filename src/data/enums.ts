@@ -13,13 +13,13 @@ export const statusOptions = ['FUTURO', 'ENCERRADO']
 /**
  * Mapeamento do campo `round` do JSON local (data/worldcup-2026/matches.json)
  * para o enum `fase` usado no banco de dados.
- * Rodadas de grupo ("Matchday X") são detectadas pela presença do campo `group`.
+ * Jogos de grupos são detectados no serviço pela presença do campo `group`.
  */
 export const roundToFaseMap: Record<string, string> = {
-  'Round of 32': '32_AVOS',
-  'Round of 16': 'OITAVAS',
-  'Quarter-final': 'QUARTAS',
-  'Semi-final': 'SEMI',
-  'Match for third place': 'TERCEIRO',
+  'Fase de 32 avos': '32_AVOS',
+  'Oitavas de final': 'OITAVAS',
+  'Quartas de final': 'QUARTAS',
+  Semifinal: 'SEMI',
+  'Disputa de terceiro lugar': 'TERCEIRO',
   Final: 'FINAL',
 }

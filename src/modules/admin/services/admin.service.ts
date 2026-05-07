@@ -47,13 +47,7 @@ export class AdminService {
   }
 
   private mapearFase(round: string, group?: string): GameFase {
-    if (round.startsWith('Matchday')) {
-      if (!group) {
-        throw {
-          statusCode: 400,
-          message: `Jogo de grupos sem group: ${round}`,
-        }
-      }
+    if (group) {
       return 'GRUPOS'
     }
 
