@@ -26,6 +26,8 @@ export class BetRepository implements IBetRepository {
       ...data,
       palpite: palpiteSchema.parse(data.palpite),
       acertou: data.acertou ?? false,
+      created_at: data.created_at.toISOString(),
+      updated_at: data.updated_at.toISOString(),
     }
   }
 
@@ -49,6 +51,9 @@ export class BetRepository implements IBetRepository {
       ...data,
       palpite: palpiteSchema.parse(data.palpite),
       acertou: data.acertou ?? false,
+      created_at: data.created_at.toISOString(),
+      updated_at: data.updated_at.toISOString(),
+      data_hora: data.data_hora.toISOString(),
     }
   }
 

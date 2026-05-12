@@ -2,27 +2,27 @@ import type { RouteShorthandOptions } from 'fastify'
 import { z } from 'zod'
 
 const betResponseSchema = z.object({
-  id: z.string(),
+  id: z.number(),
   userId: z.string(),
   gameId: z.string(),
   palpite: z.enum(['A', 'B', 'EMPATE']),
   acertou: z.boolean(),
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
+  created_at: z.string(),
+  updated_at: z.string(),
 })
 
 const betFullResponseSchema = z.object({
-  id: z.string(),
+  id: z.number(),
   userId: z.string(),
   gameId: z.string(),
   palpite: z.enum(['A', 'B', 'EMPATE']),
   acertou: z.boolean(),
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
+  created_at: z.string(),
+  updated_at: z.string(),
   username: z.string(),
   team_a: z.string(),
   team_b: z.string(),
-  data_hora: z.string().datetime(),
+  data_hora: z.string(),
   gols_a: z.number().nullable(),
   gols_b: z.number().nullable(),
   finish_game: z.boolean(),

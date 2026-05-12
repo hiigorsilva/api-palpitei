@@ -1,7 +1,7 @@
 import { isValidId } from '../../../shared/utils/helpers'
 import type { GameRepository } from '../../games/repositories/game.repository'
 import type { UserRepository } from '../../users/repositories/user.repository'
-import type { IBet, Palpite } from '../interfaces/bet.interface'
+import type { IBet, IBetFull, Palpite } from '../interfaces/bet.interface'
 import type { BetRepository } from '../repositories/bet.repository'
 
 export class BetService {
@@ -65,11 +65,7 @@ export class BetService {
     return await this.betRepository.create(userId, gameId, palpite)
   }
 
-  async editBet(
-    id: number,
-    userId: string,
-    palpite: Palpite
-  ): Promise<IBet> {
+  async editBet(id: number, userId: string, palpite: Palpite): Promise<IBet> {
     // Verificar se o ID do usuário é válido (uuid)
     if (!isValidId(userId)) {
       throw { statusCode: 400, message: 'ID do usuário inválido' }
@@ -97,11 +93,12 @@ export class BetService {
     return await this.betRepository.update(id, palpite)
   }
 
-  async listBetsByUser(userId: string): Promise<IBet[]> {
+  async listBetsByUser(userId: string): Promise<IBetFull[]> {
     const user = await this.userRepository.findById(userId)
     if (!user) {
       throw { statusCode: 404, message: 'Usuário não encontrado' }
     }
-    return await this.betRepository.getByUser(userId)
+    const bets = await this.betRepository.getByUser(userId)
+    return bets
   }
 }
