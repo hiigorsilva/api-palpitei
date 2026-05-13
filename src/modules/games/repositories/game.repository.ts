@@ -1,5 +1,4 @@
 import { and, count, eq, gt, gte, lte, sql } from 'drizzle-orm'
-import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 import { alias } from 'drizzle-orm/pg-core'
 import { db } from '../../../db/connection'
 import { bet } from '../../../db/schemas/bet'
@@ -14,9 +13,13 @@ import type {
   IGameRepository,
 } from '../interfaces/game.interface'
 
+const EMPTY_USER_ID = '00000000-0000-0000-0000-000000000000'
+
 export class GameRepository implements IGameRepository {
   private readonly teamA = alias(teams, 'team_a')
   private readonly teamB = alias(teams, 'team_b')
+  private readonly championBetA = alias(championBets, 'team_a_champion_bet')
+  private readonly championBetB = alias(championBets, 'team_b_champion_bet')
 
   private teamDetails(data: {
     id: string | null
@@ -59,16 +62,6 @@ export class GameRepository implements IGameRepository {
     }
   }
 
-  private championBetSql(teamId: AnyPgColumn, userId?: string) {
-    if (!userId) return sql<boolean>`false`
-
-    return sql<boolean>`exists (
-      select 1 from ${championBets}
-      where ${championBets.userId} = ${userId}
-        and ${championBets.teamId} = ${teamId}
-    )`
-  }
-
   private selectWithTeams(userId?: string) {
     return db
       .select({
@@ -95,7 +88,7 @@ export class GameRepository implements IGameRepository {
         team_a_fifa_code: this.teamA.code,
         team_a_group: this.teamA.group,
         team_a_confed: this.teamA.confed,
-        team_a_is_palpite_campeao: this.championBetSql(this.teamA.id, userId),
+        team_a_is_palpite_campeao: sql<boolean>`${this.championBetA.id} is not null`,
         team_b_id: this.teamB.id,
         team_b_name: this.teamB.name,
         team_b_flag: this.teamB.logo,
@@ -105,11 +98,25 @@ export class GameRepository implements IGameRepository {
         team_b_fifa_code: this.teamB.code,
         team_b_group: this.teamB.group,
         team_b_confed: this.teamB.confed,
-        team_b_is_palpite_campeao: this.championBetSql(this.teamB.id, userId),
+        team_b_is_palpite_campeao: sql<boolean>`${this.championBetB.id} is not null`,
       })
       .from(games)
       .leftJoin(this.teamA, eq(games.team_a, this.teamA.name))
       .leftJoin(this.teamB, eq(games.team_b, this.teamB.name))
+      .leftJoin(
+        this.championBetA,
+        and(
+          eq(this.championBetA.userId, userId ?? EMPTY_USER_ID),
+          eq(this.championBetA.teamId, this.teamA.id)
+        )
+      )
+      .leftJoin(
+        this.championBetB,
+        and(
+          eq(this.championBetB.userId, userId ?? EMPTY_USER_ID),
+          eq(this.championBetB.teamId, this.teamB.id)
+        )
+      )
   }
 
   private toIGame(

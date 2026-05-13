@@ -1,4 +1,4 @@
-import { asc, eq, sql } from 'drizzle-orm'
+import { and, asc, eq, sql } from 'drizzle-orm'
 import { db } from '../../../db/connection'
 import { championBets } from '../../../db/schemas/champion-bets'
 import { teams } from '../../../db/schemas/teams'
@@ -8,18 +8,10 @@ import type {
   ITeamRepository,
 } from '../interfaces/team.interface'
 
+const EMPTY_USER_ID = '00000000-0000-0000-0000-000000000000'
+
 export class TeamRepository implements ITeamRepository {
-  private championBetSql(userId?: string) {
-    if (!userId) return sql<boolean>`false`
-
-    return sql<boolean>`exists (
-      select 1 from ${championBets}
-      where ${championBets.userId} = ${userId}
-        and ${championBets.teamId} = ${teams.id}
-    )`
-  }
-
-  private selectFields(userId?: string) {
+  private selectFields() {
     return {
       id: teams.id,
       apiId: teams.apiId,
@@ -33,7 +25,7 @@ export class TeamRepository implements ITeamRepository {
       group: teams.group,
       created_at: teams.created_at,
       updated_at: teams.updated_at,
-      isPalpiteCampeao: this.championBetSql(userId),
+      isPalpiteCampeao: sql<boolean>`${championBets.id} is not null`,
     }
   }
 
@@ -60,8 +52,15 @@ export class TeamRepository implements ITeamRepository {
 
   async findAll(userId?: string): Promise<ITeam[]> {
     const result = await db
-      .select(this.selectFields(userId))
+      .select(this.selectFields())
       .from(teams)
+      .leftJoin(
+        championBets,
+        and(
+          eq(championBets.userId, userId ?? EMPTY_USER_ID),
+          eq(championBets.teamId, teams.id)
+        )
+      )
       .orderBy(asc(teams.group), asc(teams.name))
 
     return result.map(team => this.toITeam(team))
@@ -69,8 +68,15 @@ export class TeamRepository implements ITeamRepository {
 
   async findByGroup(group: Grupo, userId?: string): Promise<ITeam[]> {
     const result = await db
-      .select(this.selectFields(userId))
+      .select(this.selectFields())
       .from(teams)
+      .leftJoin(
+        championBets,
+        and(
+          eq(championBets.userId, userId ?? EMPTY_USER_ID),
+          eq(championBets.teamId, teams.id)
+        )
+      )
       .where(eq(teams.group, group))
       .orderBy(asc(teams.name))
 
