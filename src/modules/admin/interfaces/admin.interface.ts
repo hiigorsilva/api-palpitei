@@ -74,6 +74,7 @@ export interface IPopularBaseResponse {
   teams_inseridos: number
   teams_ignorados: number
   jogos_inseridos: number
+  jogos_atualizados: number
   jogos_ignorados: number
 }
 

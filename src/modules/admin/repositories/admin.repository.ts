@@ -133,6 +133,32 @@ export class AdminRepository {
     })
   }
 
+  async atualizarJogoPorApiId(data: {
+    apiId: number
+    team_a: string
+    team_b: string
+    fase:
+      | 'GRUPOS'
+      | '16_AVOS'
+      | 'OITAVAS'
+      | 'QUARTAS'
+      | 'SEMI'
+      | 'TERCEIRO'
+      | 'FINAL'
+    data_hora: Date
+  }): Promise<void> {
+    await db
+      .update(games)
+      .set({
+        team_a: data.team_a,
+        team_b: data.team_b,
+        fase: data.fase,
+        data_hora: data.data_hora,
+        updated_at: new Date(),
+      })
+      .where(eq(games.apiId, data.apiId))
+  }
+
   async atualizarResultadoJogo(
     gameId: string,
     gols_a: number,

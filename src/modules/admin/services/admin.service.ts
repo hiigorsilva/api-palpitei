@@ -464,23 +464,26 @@ export class AdminService {
     }
 
     let jogosInseridos = 0
+    let jogosAtualizados = 0
     let jogosIgnorados = 0
 
     for (const [index, match] of matchesData.matches.entries()) {
       const apiId = index + 1
-      const exists = await this.adminRepository.buscarJogoPorApiId(apiId)
-      if (exists) {
-        jogosIgnorados++
-        continue
-      }
-
-      await this.adminRepository.inserirJogo({
+      const gameData = {
         apiId,
         team_a: match.team1,
         team_b: match.team2,
         fase: this.mapearFase(match.round, match.group),
         data_hora: this.parseDateTimeFromMatch(match.date, match.time),
-      })
+      }
+      const exists = await this.adminRepository.buscarJogoPorApiId(apiId)
+      if (exists) {
+        await this.adminRepository.atualizarJogoPorApiId(gameData)
+        jogosAtualizados++
+        continue
+      }
+
+      await this.adminRepository.inserirJogo(gameData)
       jogosInseridos++
     }
 
@@ -488,6 +491,7 @@ export class AdminService {
       teams_inseridos: teamsInseridos,
       teams_ignorados: teamsIgnorados,
       jogos_inseridos: jogosInseridos,
+      jogos_atualizados: jogosAtualizados,
       jogos_ignorados: jogosIgnorados,
     }
   }

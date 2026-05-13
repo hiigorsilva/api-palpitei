@@ -18,6 +18,7 @@ export const popularBaseLocalSchema: RouteShorthandOptions = {
         teams_inseridos: z.number(),
         teams_ignorados: z.number(),
         jogos_inseridos: z.number(),
+        jogos_atualizados: z.number(),
         jogos_ignorados: z.number(),
       }),
       400: errorResponseSchema,
