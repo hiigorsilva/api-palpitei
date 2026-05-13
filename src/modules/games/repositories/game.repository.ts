@@ -1,6 +1,7 @@
-import { and, count, eq, gt, gte, lte } from 'drizzle-orm'
+import { and, count, eq, gt, gte, lte, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { db } from '../../../db/connection'
+import { bet } from '../../../db/schemas/bet'
 import { games } from '../../../db/schemas/games'
 import { teams } from '../../../db/schemas/teams'
 import type { ITeamDetails } from '../../teams/interfaces/team.interface'
@@ -63,6 +64,10 @@ export class GameRepository implements IGameRepository {
         gols_a: games.gols_a,
         gols_b: games.gols_b,
         finish_game: games.finish_game,
+        has_palpite: sql<boolean>`exists (
+          select 1 from ${bet}
+          where ${bet.gameId} = ${games.id}
+        )`,
         created_at: games.created_at,
         updated_at: games.updated_at,
         team_a_name: this.teamA.name,
@@ -119,6 +124,7 @@ export class GameRepository implements IGameRepository {
       gols_a: data.gols_a,
       gols_b: data.gols_b,
       finish_game: data.finish_game,
+      has_palpite: data.has_palpite,
       created_at: data.created_at,
       updated_at: data.updated_at,
     }

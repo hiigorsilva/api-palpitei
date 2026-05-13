@@ -12,6 +12,7 @@ export interface IGame {
   gols_a: number | null
   gols_b: number | null
   finish_game: boolean
+  has_palpite: boolean
   created_at: Date
   updated_at: Date
 }
