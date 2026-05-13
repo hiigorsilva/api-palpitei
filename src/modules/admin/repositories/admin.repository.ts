@@ -20,6 +20,10 @@ export class AdminRepository {
     name: string
     code: string | null
     logo: string | null
+    continent: string | null
+    flagIcon: string | null
+    flagUnicode: string | null
+    confed: string | null
     group: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L'
   }): Promise<void> {
     await db.insert(teams).values({
@@ -27,18 +31,48 @@ export class AdminRepository {
       name: data.name,
       code: data.code,
       logo: data.logo,
+      continent: data.continent,
+      flagIcon: data.flagIcon,
+      flagUnicode: data.flagUnicode,
+      confed: data.confed,
       group: data.group,
     })
   }
 
-  async atualizarGrupoTeamPorNome(
+  async atualizarTeamPorNome(
     name: string,
-    group: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L'
+    data: {
+      code: string | null
+      logo: string | null
+      continent: string | null
+      flagIcon: string | null
+      flagUnicode: string | null
+      confed: string | null
+      group:
+        | 'A'
+        | 'B'
+        | 'C'
+        | 'D'
+        | 'E'
+        | 'F'
+        | 'G'
+        | 'H'
+        | 'I'
+        | 'J'
+        | 'K'
+        | 'L'
+    }
   ): Promise<void> {
     await db
       .update(teams)
       .set({
-        group,
+        code: data.code,
+        logo: data.logo,
+        continent: data.continent,
+        flagIcon: data.flagIcon,
+        flagUnicode: data.flagUnicode,
+        confed: data.confed,
+        group: data.group,
         updated_at: new Date(),
       })
       .where(eq(teams.name, name))

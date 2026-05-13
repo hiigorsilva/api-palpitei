@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { ITeamDetails } from '../../teams/interfaces/team.interface'
 
 export interface IBet {
   id: number
@@ -14,6 +15,8 @@ export interface IBetFull extends IBet {
   username: string
   team_a: string
   team_b: string
+  team_a_info: ITeamDetails | null
+  team_b_info: ITeamDetails | null
   data_hora: string
   gols_a: number | null
   gols_b: number | null

@@ -1,8 +1,11 @@
 import { and, count, countDistinct, eq, sql } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core'
 import { db } from '../../../db/connection'
 import { bet } from '../../../db/schemas/bet'
 import { games } from '../../../db/schemas/games'
+import { teams } from '../../../db/schemas/teams'
 import { users } from '../../../db/schemas/users'
+import type { Grupo, ITeamDetails } from '../../teams/interfaces/team.interface'
 import type {
   IBet,
   IBetFull,
@@ -13,6 +16,33 @@ import type {
 import { palpiteSchema } from '../interfaces/bet.interface'
 
 export class BetRepository implements IBetRepository {
+  private readonly teamA = alias(teams, 'bet_team_a')
+  private readonly teamB = alias(teams, 'bet_team_b')
+
+  private teamDetails(data: {
+    name: string | null
+    flag: string | null
+    continent: string | null
+    flagIcon: string | null
+    flagUnicode: string | null
+    fifaCode: string | null
+    group: Grupo | null
+    confed: string | null
+  }): ITeamDetails | null {
+    if (!data.name || !data.group) return null
+
+    return {
+      name: data.name,
+      flag: data.flag,
+      continent: data.continent,
+      flag_icon: data.flagIcon,
+      flag_unicode: data.flagUnicode,
+      fifa_code: data.fifaCode,
+      group: data.group,
+      confed: data.confed,
+    }
+  }
+
   private toIBet(data: {
     id: number
     userId: string
@@ -42,18 +72,62 @@ export class BetRepository implements IBetRepository {
     username: string
     team_a: string
     team_b: string
+    team_a_name: string | null
+    team_a_flag: string | null
+    team_a_continent: string | null
+    team_a_flag_icon: string | null
+    team_a_flag_unicode: string | null
+    team_a_fifa_code: string | null
+    team_a_group: Grupo | null
+    team_a_confed: string | null
+    team_b_name: string | null
+    team_b_flag: string | null
+    team_b_continent: string | null
+    team_b_flag_icon: string | null
+    team_b_flag_unicode: string | null
+    team_b_fifa_code: string | null
+    team_b_group: Grupo | null
+    team_b_confed: string | null
     data_hora: Date
     gols_a: number | null
     gols_b: number | null
     finish_game: boolean
   }): IBetFull {
     return {
-      ...data,
+      id: data.id,
+      userId: data.userId,
+      gameId: data.gameId,
       palpite: palpiteSchema.parse(data.palpite),
       acertou: data.acertou ?? false,
       created_at: data.created_at.toISOString(),
       updated_at: data.updated_at.toISOString(),
+      username: data.username,
+      team_a: data.team_a,
+      team_b: data.team_b,
       data_hora: data.data_hora.toISOString(),
+      gols_a: data.gols_a,
+      gols_b: data.gols_b,
+      finish_game: data.finish_game,
+      team_a_info: this.teamDetails({
+        name: data.team_a_name,
+        flag: data.team_a_flag,
+        continent: data.team_a_continent,
+        flagIcon: data.team_a_flag_icon,
+        flagUnicode: data.team_a_flag_unicode,
+        fifaCode: data.team_a_fifa_code,
+        group: data.team_a_group,
+        confed: data.team_a_confed,
+      }),
+      team_b_info: this.teamDetails({
+        name: data.team_b_name,
+        flag: data.team_b_flag,
+        continent: data.team_b_continent,
+        flagIcon: data.team_b_flag_icon,
+        flagUnicode: data.team_b_flag_unicode,
+        fifaCode: data.team_b_fifa_code,
+        group: data.team_b_group,
+        confed: data.team_b_confed,
+      }),
     }
   }
 
@@ -96,6 +170,22 @@ export class BetRepository implements IBetRepository {
         username: users.name,
         team_a: games.team_a,
         team_b: games.team_b,
+        team_a_name: this.teamA.name,
+        team_a_flag: this.teamA.logo,
+        team_a_continent: this.teamA.continent,
+        team_a_flag_icon: this.teamA.flagIcon,
+        team_a_flag_unicode: this.teamA.flagUnicode,
+        team_a_fifa_code: this.teamA.code,
+        team_a_group: this.teamA.group,
+        team_a_confed: this.teamA.confed,
+        team_b_name: this.teamB.name,
+        team_b_flag: this.teamB.logo,
+        team_b_continent: this.teamB.continent,
+        team_b_flag_icon: this.teamB.flagIcon,
+        team_b_flag_unicode: this.teamB.flagUnicode,
+        team_b_fifa_code: this.teamB.code,
+        team_b_group: this.teamB.group,
+        team_b_confed: this.teamB.confed,
         data_hora: games.data_hora,
         gols_a: games.gols_a,
         gols_b: games.gols_b,
@@ -104,6 +194,8 @@ export class BetRepository implements IBetRepository {
       .from(bet)
       .innerJoin(users, eq(bet.userId, users.id))
       .innerJoin(games, eq(bet.gameId, games.id))
+      .leftJoin(this.teamA, eq(games.team_a, this.teamA.name))
+      .leftJoin(this.teamB, eq(games.team_b, this.teamB.name))
       .where(eq(bet.userId, userId))
       .orderBy(games.data_hora)
     return result.map(betData => this.toIBetFull(betData))

@@ -1,10 +1,25 @@
 import type { RouteShorthandOptions } from 'fastify'
 import { z } from 'zod'
 
+const teamDetailsResponseSchema = z
+  .object({
+    name: z.string(),
+    flag: z.string().nullable(),
+    continent: z.string().nullable(),
+    flag_icon: z.string().nullable(),
+    flag_unicode: z.string().nullable(),
+    fifa_code: z.string().nullable(),
+    group: z.enum(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']),
+    confed: z.string().nullable(),
+  })
+  .nullable()
+
 const gameResponseSchema = z.object({
   id: z.string(),
   team_a: z.string(),
   team_b: z.string(),
+  team_a_info: teamDetailsResponseSchema,
+  team_b_info: teamDetailsResponseSchema,
   fase: z.string(),
   data_hora: z.union([z.string().datetime(), z.date()]),
   gols_a: z.number().nullable(),

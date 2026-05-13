@@ -1,9 +1,12 @@
 import { z } from 'zod'
+import type { ITeamDetails } from '../../teams/interfaces/team.interface'
 
 export interface IGame {
   id: string
   team_a: string
   team_b: string
+  team_a_info: ITeamDetails | null
+  team_b_info: ITeamDetails | null
   fase: string
   data_hora: Date
   gols_a: number | null

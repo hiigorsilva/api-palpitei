@@ -22,10 +22,26 @@ export interface ITeam {
   apiId: number
   name: string
   code: string | null
-  logo: string | null
+  flag: string | null
+  continent: string | null
+  flag_icon: string | null
+  flag_unicode: string | null
+  fifa_code: string | null
+  confed: string | null
   group: Grupo
   created_at: Date
   updated_at: Date
+}
+
+export interface ITeamDetails {
+  name: string
+  flag: string | null
+  continent: string | null
+  flag_icon: string | null
+  flag_unicode: string | null
+  fifa_code: string | null
+  group: Grupo
+  confed: string | null
 }
 
 export interface ITeamRepository {

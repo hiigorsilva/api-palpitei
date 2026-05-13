@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm'
 import { roundToFaseMap } from '../../../data/enums'
 import { db } from '../../../db/connection'
 import { ranking } from '../../../db/schemas/ranking'
+import { buildFlagPath } from '../../../shared/utils/flag-path'
 import { isValidId } from '../../../shared/utils/helpers'
 import type { BetRepository } from '../../bet/repositories/bet.repository'
 import type { BonusService } from '../../bonus-progresso/services/bonus-progresso.service'
@@ -407,8 +408,12 @@ export class AdminService {
 
     const teamsData = JSON.parse(teamsJson) as Array<{
       name: string
+      continent: string
+      flag_icon: string
+      flag_unicode: string
       fifa_code?: string
       group: string
+      confed: string
     }>
     const matchesData = JSON.parse(matchesJson) as {
       matches: Array<{
@@ -426,12 +431,20 @@ export class AdminService {
 
     for (const [index, team] of teamsData.entries()) {
       const teamGroup = this.parseGroup(team.group)
+      const teamFlag = team.fifa_code
+        ? buildFlagPath(team.flag_icon, team.fifa_code)
+        : null
       const exists = await this.adminRepository.buscarTeamPorNome(team.name)
       if (exists) {
-        await this.adminRepository.atualizarGrupoTeamPorNome(
-          team.name,
-          teamGroup
-        )
+        await this.adminRepository.atualizarTeamPorNome(team.name, {
+          code: team.fifa_code ?? null,
+          logo: teamFlag,
+          continent: team.continent,
+          flagIcon: team.flag_icon,
+          flagUnicode: team.flag_unicode,
+          confed: team.confed,
+          group: teamGroup,
+        })
         teamsIgnorados++
         continue
       }
@@ -440,7 +453,11 @@ export class AdminService {
         apiId: index + 1,
         name: team.name,
         code: team.fifa_code ?? null,
-        logo: null,
+        logo: teamFlag,
+        continent: team.continent,
+        flagIcon: team.flag_icon,
+        flagUnicode: team.flag_unicode,
+        confed: team.confed,
         group: teamGroup,
       })
       teamsInseridos++
