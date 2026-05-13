@@ -18,7 +18,7 @@ export const games = pgTable('games', {
 
   // dados do jogo
   fase: faseEnum('fase').notNull(),
-  data_hora: timestamp('data_hora').notNull(),
+  data_hora: timestamp('data_hora', { withTimezone: true }).notNull(),
 
   // resultado real (null antes do jogo)
   gols_a: integer('gols_a'),

@@ -1,4 +1,5 @@
-CREATE TYPE "public"."fase" AS ENUM('GRUPOS', '32_AVOS', 'OITAVAS', 'QUARTAS', 'SEMI', 'TERCEIRO', 'FINAL');--> statement-breakpoint
+CREATE TYPE "public"."fase" AS ENUM('GRUPOS', '16_AVOS', 'OITAVAS', 'QUARTAS', 'SEMI', 'TERCEIRO', 'FINAL');--> statement-breakpoint
+CREATE TYPE "public"."grupo" AS ENUM('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L');--> statement-breakpoint
 CREATE TYPE "public"."nivel" AS ENUM('INICIANTE', 'BRONZE', 'PRATA', 'OURO', 'PLATINA', 'DIAMANTE');--> statement-breakpoint
 CREATE TABLE "bet" (
 	"id" serial PRIMARY KEY NOT NULL,
@@ -13,15 +14,17 @@ CREATE TABLE "bet" (
 --> statement-breakpoint
 CREATE TABLE "games" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"api_id" integer,
 	"team_a" varchar(100) NOT NULL,
 	"team_b" varchar(100) NOT NULL,
 	"fase" "fase" NOT NULL,
-	"data_hora" timestamp NOT NULL,
+	"data_hora" timestamp with time zone NOT NULL,
 	"gols_a" integer,
 	"gols_b" integer,
 	"finish_game" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "games_api_id_unique" UNIQUE("api_id")
 );
 --> statement-breakpoint
 CREATE TABLE "bonus_participacao" (
@@ -46,6 +49,22 @@ CREATE TABLE "ranking" (
 	"total_apostas" integer DEFAULT 0 NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "ranking_user_id_unique" UNIQUE("user_id")
+);
+--> statement-breakpoint
+CREATE TABLE "teams" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"api_id" integer NOT NULL,
+	"name" varchar(100) NOT NULL,
+	"code" varchar(10),
+	"logo" varchar(255),
+	"continent" varchar(50),
+	"flag_icon" varchar(20),
+	"flag_unicode" varchar(100),
+	"confed" varchar(20),
+	"group" "grupo" NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "teams_api_id_unique" UNIQUE("api_id")
 );
 --> statement-breakpoint
 CREATE TABLE "users" (

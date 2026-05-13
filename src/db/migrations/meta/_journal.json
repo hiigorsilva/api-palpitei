@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1777635782329,
-      "tag": "0000_acoustic_ikaris",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1777662487703,
-      "tag": "0001_quiet_bromley",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1777921839940,
-      "tag": "0002_curious_spectrum",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1778685409674,
-      "tag": "0003_nervous_earthquake",
+      "when": 1778686990079,
+      "tag": "0000_wakeful_the_santerians",
       "breakpoints": true
     }
   ]
