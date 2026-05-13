@@ -11,6 +11,7 @@ const teamDetailsResponseSchema = z
     fifa_code: z.string().nullable(),
     group: z.enum(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']),
     confed: z.string().nullable(),
+    isPalpiteCampeao: z.boolean(),
   })
   .nullable()
 
@@ -54,6 +55,7 @@ const querySchema = z.object({
         'Status inválido. Informe se é um jogo FUTURO ou se já está ENCERRADO',
     })
     .optional(),
+  userId: z.string().uuid('ID do usuário inválido.').optional(),
 })
 
 export const listGamesSchema: RouteShorthandOptions = {

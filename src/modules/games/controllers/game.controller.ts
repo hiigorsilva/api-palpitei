@@ -12,6 +12,7 @@ type GetGameByIdParams = z.infer<typeof paramsSchema>
 const querySchema = z.object({
   fase: GameFaseSchema.optional(),
   status: GameStatusSchema.optional(),
+  userId: z.string().uuid().optional(),
 })
 
 export class GameController {
@@ -24,7 +25,7 @@ export class GameController {
       return reply.status(404).send({ message: 'Fase não encontrada' })
     }
     if (query.fase && faseOptions.includes(query.fase)) {
-      const games = await this.gameService.listByFase(query.fase)
+      const games = await this.gameService.listByFase(query.fase, query.userId)
       return reply.status(200).send(games)
     }
 
@@ -32,11 +33,14 @@ export class GameController {
       return reply.status(404).send({ message: 'Status não encontrado' })
     }
     if (query.status && statusOptions.includes(query.status)) {
-      const games = await this.gameService.listByStatus(query.status)
+      const games = await this.gameService.listByStatus(
+        query.status,
+        query.userId
+      )
       return reply.status(200).send(games)
     }
 
-    const games = await this.gameService.listAll()
+    const games = await this.gameService.listAll(query.userId)
     return reply.status(200).send(games)
   }
 
@@ -46,17 +50,20 @@ export class GameController {
       return reply.status(400).send({ message: 'ID é obrigatório' })
     }
 
-    const game = await this.gameService.getById(params.id)
+    const query = querySchema.pick({ userId: true }).parse(request.query)
+    const game = await this.gameService.getById(params.id, query.userId)
     return reply.status(200).send(game)
   }
 
-  async listPendentes(_request: FastifyRequest, reply: FastifyReply) {
-    const games = await this.gameService.listPendentes()
+  async listPendentes(request: FastifyRequest, reply: FastifyReply) {
+    const query = querySchema.pick({ userId: true }).parse(request.query)
+    const games = await this.gameService.listPendentes(query.userId)
     return reply.status(200).send(games)
   }
 
-  async listHoje(_request: FastifyRequest, reply: FastifyReply) {
-    const games = await this.gameService.listHoje()
+  async listHoje(request: FastifyRequest, reply: FastifyReply) {
+    const query = querySchema.pick({ userId: true }).parse(request.query)
+    const games = await this.gameService.listHoje(query.userId)
     return reply.status(200).send(games)
   }
 }

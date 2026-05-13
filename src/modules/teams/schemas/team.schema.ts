@@ -13,6 +13,7 @@ const teamResponseSchema = z.object({
   fifa_code: z.string().nullable(),
   group: z.enum(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']),
   confed: z.string().nullable(),
+  isPalpiteCampeao: z.boolean(),
   created_at: z.coerce.date(),
   updated_at: z.coerce.date(),
 })
@@ -27,6 +28,7 @@ const querySchema = z.object({
       error: 'Grupo inválido. Informe um grupo entre A e L.',
     })
     .optional(),
+  userId: z.string().uuid('ID do usuário inválido.').optional(),
 })
 
 export const listTeamsSchema: RouteShorthandOptions = {

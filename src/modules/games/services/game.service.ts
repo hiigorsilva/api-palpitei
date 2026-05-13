@@ -4,31 +4,31 @@ import type { GameRepository } from '../repositories/game.repository'
 export class GameService {
   constructor(private gameRepository: GameRepository) {}
 
-  async listAll(): Promise<IGame[]> {
-    return await this.gameRepository.listAll()
+  async listAll(userId?: string): Promise<IGame[]> {
+    return await this.gameRepository.listAll(userId)
   }
 
-  async getById(id: string): Promise<IGame> {
-    const game = await this.gameRepository.getById(id)
+  async getById(id: string, userId?: string): Promise<IGame> {
+    const game = await this.gameRepository.getById(id, userId)
     if (!game) {
       throw { statusCode: 404, message: 'Jogo não encontrado' }
     }
     return game
   }
 
-  async listByFase(fase: GameFase): Promise<IGame[]> {
-    return await this.gameRepository.listByFase(fase)
+  async listByFase(fase: GameFase, userId?: string): Promise<IGame[]> {
+    return await this.gameRepository.listByFase(fase, userId)
   }
 
-  async listByStatus(status: GameStatus): Promise<IGame[]> {
-    return await this.gameRepository.listByStatus(status)
+  async listByStatus(status: GameStatus, userId?: string): Promise<IGame[]> {
+    return await this.gameRepository.listByStatus(status, userId)
   }
 
-  async listPendentes(): Promise<IGame[]> {
-    return await this.gameRepository.listPendentes()
+  async listPendentes(userId?: string): Promise<IGame[]> {
+    return await this.gameRepository.listPendentes(userId)
   }
 
-  async listHoje(): Promise<IGame[]> {
-    return await this.gameRepository.listHoje()
+  async listHoje(userId?: string): Promise<IGame[]> {
+    return await this.gameRepository.listHoje(userId)
   }
 }

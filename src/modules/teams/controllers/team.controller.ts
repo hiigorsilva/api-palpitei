@@ -5,6 +5,7 @@ import type { TeamService } from '../services/team.service'
 
 const querySchema = z.object({
   grupo: GrupoSchema.optional(),
+  userId: z.string().uuid().optional(),
 })
 
 export class TeamController {
@@ -12,7 +13,7 @@ export class TeamController {
 
   async list(request: FastifyRequest, reply: FastifyReply) {
     const query = querySchema.parse(request.query)
-    const teams = await this.teamService.listTeams(query.grupo)
+    const teams = await this.teamService.listTeams(query.grupo, query.userId)
     return reply.status(200).send(teams)
   }
 }

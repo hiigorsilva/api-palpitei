@@ -70,6 +70,12 @@ export const CorrigirResultadoDTOSchema = z.object({
 
 export type CorrigirResultadoDTO = z.infer<typeof CorrigirResultadoDTOSchema>
 
+export const ApurarCampeaoDTOSchema = z.object({
+  teamId: z.string().uuid('ID da seleção inválido'),
+})
+
+export type ApurarCampeaoDTO = z.infer<typeof ApurarCampeaoDTOSchema>
+
 export interface IPopularBaseResponse {
   teams_inseridos: number
   teams_ignorados: number

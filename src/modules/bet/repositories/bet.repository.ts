@@ -20,6 +20,7 @@ export class BetRepository implements IBetRepository {
   private readonly teamB = alias(teams, 'bet_team_b')
 
   private teamDetails(data: {
+    id: string | null
     name: string | null
     flag: string | null
     continent: string | null
@@ -29,9 +30,10 @@ export class BetRepository implements IBetRepository {
     group: Grupo | null
     confed: string | null
   }): ITeamDetails | null {
-    if (!data.name || !data.group) return null
+    if (!data.id || !data.name || !data.group) return null
 
     return {
+      id: data.id,
       name: data.name,
       flag: data.flag,
       continent: data.continent,
@@ -40,6 +42,7 @@ export class BetRepository implements IBetRepository {
       fifa_code: data.fifaCode,
       group: data.group,
       confed: data.confed,
+      isPalpiteCampeao: false,
     }
   }
 
@@ -73,6 +76,7 @@ export class BetRepository implements IBetRepository {
     team_a: string
     team_b: string
     team_a_name: string | null
+    team_a_id: string | null
     team_a_flag: string | null
     team_a_continent: string | null
     team_a_flag_icon: string | null
@@ -81,6 +85,7 @@ export class BetRepository implements IBetRepository {
     team_a_group: Grupo | null
     team_a_confed: string | null
     team_b_name: string | null
+    team_b_id: string | null
     team_b_flag: string | null
     team_b_continent: string | null
     team_b_flag_icon: string | null
@@ -109,6 +114,7 @@ export class BetRepository implements IBetRepository {
       gols_b: data.gols_b,
       finish_game: data.finish_game,
       team_a_info: this.teamDetails({
+        id: data.team_a_id,
         name: data.team_a_name,
         flag: data.team_a_flag,
         continent: data.team_a_continent,
@@ -119,6 +125,7 @@ export class BetRepository implements IBetRepository {
         confed: data.team_a_confed,
       }),
       team_b_info: this.teamDetails({
+        id: data.team_b_id,
         name: data.team_b_name,
         flag: data.team_b_flag,
         continent: data.team_b_continent,
@@ -170,6 +177,7 @@ export class BetRepository implements IBetRepository {
         username: users.name,
         team_a: games.team_a,
         team_b: games.team_b,
+        team_a_id: this.teamA.id,
         team_a_name: this.teamA.name,
         team_a_flag: this.teamA.logo,
         team_a_continent: this.teamA.continent,
@@ -178,6 +186,7 @@ export class BetRepository implements IBetRepository {
         team_a_fifa_code: this.teamA.code,
         team_a_group: this.teamA.group,
         team_a_confed: this.teamA.confed,
+        team_b_id: this.teamB.id,
         team_b_name: this.teamB.name,
         team_b_flag: this.teamB.logo,
         team_b_continent: this.teamB.continent,

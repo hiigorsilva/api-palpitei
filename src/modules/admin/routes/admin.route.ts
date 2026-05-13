@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import { basicAuth } from '../auth/auth'
 import { adminController } from '../instances/admin.instance'
 import {
+  apurarCampeaoSchema,
   atualizarParticipantesJogoSchema,
   atualizarParticipantesLoteSchema,
   atualizarResultadoSchema,
@@ -49,6 +50,10 @@ export async function adminRoute(app: FastifyInstance) {
     inserirLoteResultadosSchema,
     (request, reply) =>
       adminController.inserirMultiplosResultados(request, reply)
+  )
+
+  app.post('/admin/campeao', apurarCampeaoSchema, (request, reply) =>
+    adminController.apurarCampeao(request, reply)
   )
 
   // Utilitários

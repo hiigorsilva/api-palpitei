@@ -32,12 +32,12 @@ export const GameStatusSchema = z.enum(['FUTURO', 'ENCERRADO'])
 export type GameStatus = z.infer<typeof GameStatusSchema>
 
 export interface IGameRepository {
-  listAll(): Promise<IGame[]>
-  getById(id: string): Promise<IGame | null>
-  listByFase(fase: GameFase): Promise<IGame[]>
-  listByStatus(status: GameStatus): Promise<IGame[]>
+  listAll(userId?: string): Promise<IGame[]>
+  getById(id: string, userId?: string): Promise<IGame | null>
+  listByFase(fase: GameFase, userId?: string): Promise<IGame[]>
+  listByStatus(status: GameStatus, userId?: string): Promise<IGame[]>
   updateResult(id: string, gols_a: number, gols_b: number): Promise<IGame>
   contarTotalJogos(): Promise<number>
-  listPendentes(): Promise<IGame[]>
-  listHoje(): Promise<IGame[]>
+  listPendentes(userId?: string): Promise<IGame[]>
+  listHoje(userId?: string): Promise<IGame[]>
 }

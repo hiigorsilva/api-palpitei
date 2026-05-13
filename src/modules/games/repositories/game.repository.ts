@@ -1,7 +1,9 @@
 import { and, count, eq, gt, gte, lte, sql } from 'drizzle-orm'
+import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 import { alias } from 'drizzle-orm/pg-core'
 import { db } from '../../../db/connection'
 import { bet } from '../../../db/schemas/bet'
+import { championBets } from '../../../db/schemas/champion-bets'
 import { games } from '../../../db/schemas/games'
 import { teams } from '../../../db/schemas/teams'
 import type { ITeamDetails } from '../../teams/interfaces/team.interface'
@@ -17,6 +19,7 @@ export class GameRepository implements IGameRepository {
   private readonly teamB = alias(teams, 'team_b')
 
   private teamDetails(data: {
+    id: string | null
     name: string | null
     flag: string | null
     continent: string | null
@@ -38,10 +41,12 @@ export class GameRepository implements IGameRepository {
       | 'L'
       | null
     confed: string | null
+    isPalpiteCampeao: boolean
   }): ITeamDetails | null {
-    if (!data.name || !data.group) return null
+    if (!data.id || !data.name || !data.group) return null
 
     return {
+      id: data.id,
       name: data.name,
       flag: data.flag,
       continent: data.continent,
@@ -50,10 +55,21 @@ export class GameRepository implements IGameRepository {
       fifa_code: data.fifaCode,
       group: data.group,
       confed: data.confed,
+      isPalpiteCampeao: data.isPalpiteCampeao,
     }
   }
 
-  private selectWithTeams() {
+  private championBetSql(teamId: AnyPgColumn, userId?: string) {
+    if (!userId) return sql<boolean>`false`
+
+    return sql<boolean>`exists (
+      select 1 from ${championBets}
+      where ${championBets.userId} = ${userId}
+        and ${championBets.teamId} = ${teamId}
+    )`
+  }
+
+  private selectWithTeams(userId?: string) {
     return db
       .select({
         id: games.id,
@@ -70,6 +86,7 @@ export class GameRepository implements IGameRepository {
         )`,
         created_at: games.created_at,
         updated_at: games.updated_at,
+        team_a_id: this.teamA.id,
         team_a_name: this.teamA.name,
         team_a_flag: this.teamA.logo,
         team_a_continent: this.teamA.continent,
@@ -78,6 +95,8 @@ export class GameRepository implements IGameRepository {
         team_a_fifa_code: this.teamA.code,
         team_a_group: this.teamA.group,
         team_a_confed: this.teamA.confed,
+        team_a_is_palpite_campeao: this.championBetSql(this.teamA.id, userId),
+        team_b_id: this.teamB.id,
         team_b_name: this.teamB.name,
         team_b_flag: this.teamB.logo,
         team_b_continent: this.teamB.continent,
@@ -86,6 +105,7 @@ export class GameRepository implements IGameRepository {
         team_b_fifa_code: this.teamB.code,
         team_b_group: this.teamB.group,
         team_b_confed: this.teamB.confed,
+        team_b_is_palpite_campeao: this.championBetSql(this.teamB.id, userId),
       })
       .from(games)
       .leftJoin(this.teamA, eq(games.team_a, this.teamA.name))
@@ -100,6 +120,7 @@ export class GameRepository implements IGameRepository {
       team_a: data.team_a,
       team_b: data.team_b,
       team_a_info: this.teamDetails({
+        id: data.team_a_id,
         name: data.team_a_name,
         flag: data.team_a_flag,
         continent: data.team_a_continent,
@@ -108,8 +129,10 @@ export class GameRepository implements IGameRepository {
         fifaCode: data.team_a_fifa_code,
         group: data.team_a_group,
         confed: data.team_a_confed,
+        isPalpiteCampeao: data.team_a_is_palpite_campeao,
       }),
       team_b_info: this.teamDetails({
+        id: data.team_b_id,
         name: data.team_b_name,
         flag: data.team_b_flag,
         continent: data.team_b_continent,
@@ -118,6 +141,7 @@ export class GameRepository implements IGameRepository {
         fifaCode: data.team_b_fifa_code,
         group: data.team_b_group,
         confed: data.team_b_confed,
+        isPalpiteCampeao: data.team_b_is_palpite_campeao,
       }),
       fase: data.fase,
       data_hora: data.data_hora,
@@ -130,29 +154,29 @@ export class GameRepository implements IGameRepository {
     }
   }
 
-  async listAll(): Promise<IGame[]> {
-    const result = await this.selectWithTeams().orderBy(games.data_hora)
+  async listAll(userId?: string): Promise<IGame[]> {
+    const result = await this.selectWithTeams(userId).orderBy(games.data_hora)
     return result.map(game => this.toIGame(game))
   }
 
-  async getById(id: string): Promise<IGame | null> {
-    const result = await this.selectWithTeams().where(eq(games.id, id))
+  async getById(id: string, userId?: string): Promise<IGame | null> {
+    const result = await this.selectWithTeams(userId).where(eq(games.id, id))
     return result[0] ? this.toIGame(result[0]) : null
   }
 
-  async listByFase(fase: GameFase): Promise<IGame[]> {
-    const result = await this.selectWithTeams()
+  async listByFase(fase: GameFase, userId?: string): Promise<IGame[]> {
+    const result = await this.selectWithTeams(userId)
       .where(eq(games.fase, fase))
       .orderBy(games.data_hora)
 
     return result.map(game => this.toIGame(game))
   }
 
-  async listByStatus(status: GameStatus): Promise<IGame[]> {
+  async listByStatus(status: GameStatus, userId?: string): Promise<IGame[]> {
     const agora = new Date()
 
     if (status === 'FUTURO') {
-      const result = await this.selectWithTeams()
+      const result = await this.selectWithTeams(userId)
         .where(gt(games.data_hora, agora))
         .orderBy(games.data_hora)
 
@@ -160,7 +184,7 @@ export class GameRepository implements IGameRepository {
     }
 
     // status === 'finish_game'
-    const result = await this.selectWithTeams()
+    const result = await this.selectWithTeams(userId)
       .where(eq(games.finish_game, true))
       .orderBy(games.data_hora)
 
@@ -196,15 +220,15 @@ export class GameRepository implements IGameRepository {
     return result[0]?.count ?? 0
   }
 
-  async listPendentes(): Promise<IGame[]> {
-    const result = await this.selectWithTeams()
+  async listPendentes(userId?: string): Promise<IGame[]> {
+    const result = await this.selectWithTeams(userId)
       .where(eq(games.finish_game, false))
       .orderBy(games.data_hora)
 
     return result.map(game => this.toIGame(game))
   }
 
-  async listHoje(): Promise<IGame[]> {
+  async listHoje(userId?: string): Promise<IGame[]> {
     const hoje = new Date()
     const inicio = new Date(
       Date.UTC(
@@ -228,7 +252,7 @@ export class GameRepository implements IGameRepository {
         999
       )
     )
-    const result = await this.selectWithTeams()
+    const result = await this.selectWithTeams(userId)
       .where(and(gte(games.data_hora, inicio), lte(games.data_hora, fim)))
       .orderBy(games.data_hora)
 

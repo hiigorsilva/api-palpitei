@@ -9,6 +9,14 @@ type GetUserByIdParams = {
   id: string
 }
 
+type ChooseChampionParams = {
+  userId: string
+}
+
+type ChooseChampionBody = {
+  teamId: string
+}
+
 export class UserController {
   constructor(private userService: UserService) {}
 
@@ -35,5 +43,13 @@ export class UserController {
 
     if (!user) throw { statusCode: 404, message: 'Usuário não encontrado' }
     return reply.status(200).send(user)
+  }
+
+  async chooseChampionBet(request: FastifyRequest, reply: FastifyReply) {
+    const { userId } = request.params as ChooseChampionParams
+    const { teamId } = request.body as ChooseChampionBody
+    const championBet = await this.userService.chooseChampionBet(userId, teamId)
+
+    return reply.status(200).send(championBet)
   }
 }

@@ -29,11 +29,13 @@ export interface ITeam {
   fifa_code: string | null
   confed: string | null
   group: Grupo
+  isPalpiteCampeao: boolean
   created_at: Date
   updated_at: Date
 }
 
 export interface ITeamDetails {
+  id: string
   name: string
   flag: string | null
   continent: string | null
@@ -42,9 +44,10 @@ export interface ITeamDetails {
   fifa_code: string | null
   group: Grupo
   confed: string | null
+  isPalpiteCampeao: boolean
 }
 
 export interface ITeamRepository {
-  findAll(): Promise<ITeam[]>
-  findByGroup(group: Grupo): Promise<ITeam[]>
+  findAll(userId?: string): Promise<ITeam[]>
+  findByGroup(group: Grupo, userId?: string): Promise<ITeam[]>
 }

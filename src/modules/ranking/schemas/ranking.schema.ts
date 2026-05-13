@@ -8,6 +8,7 @@ const rankingItemSchema = z.object({
   pontos_total: z.number(),
   pontos_apostas: z.number(),
   pontos_bonus: z.number(),
+  pontos_campeao: z.number(),
   acertos: z.number(),
   total_apostas: z.number(),
   taxa_acerto: z.number(),

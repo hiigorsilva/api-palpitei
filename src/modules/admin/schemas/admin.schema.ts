@@ -134,6 +134,31 @@ export const corrigirResultadoSchema: RouteShorthandOptions = {
   },
 }
 
+export const apurarCampeaoSchema: RouteShorthandOptions = {
+  schema: {
+    summary: 'Apura palpites de campeão',
+    description:
+      'Admin: define o campeão real, concede pontos extras aos usuários que acertaram e recalcula o ranking.',
+    tags: ['Admin'],
+    security,
+    body: z.object({
+      teamId: z.string().uuid('ID da seleção inválido'),
+    }),
+    response: {
+      200: z.object({
+        message: z.string(),
+        campeao: z.string(),
+        pontos: z.number(),
+        palpites_corretos: z.number(),
+      }),
+      400: errorResponseSchema,
+      401: errorResponseSchema,
+      404: errorResponseSchema,
+      500: errorResponseSchema,
+    },
+  },
+}
+
 // POST /admin/resultados/lote
 export const inserirLoteResultadosSchema: RouteShorthandOptions = {
   schema: {

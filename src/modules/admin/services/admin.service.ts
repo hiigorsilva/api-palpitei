@@ -8,9 +8,9 @@ import { buildFlagPath } from '../../../shared/utils/flag-path'
 import { isValidId } from '../../../shared/utils/helpers'
 import type { BetRepository } from '../../bet/repositories/bet.repository'
 import type { BonusService } from '../../bonus-progresso/services/bonus-progresso.service'
+import type { ChampionBetRepository } from '../../champion-bets/repositories/champion-bet.repository'
 import type { GameFase } from '../../games/interfaces/game.interface'
 import type { GameRepository } from '../../games/repositories/game.repository'
-import type { RankingRepository } from '../../ranking/repositories/ranking.repository'
 import type {
   IAtualizarParticipantesLoteResponse,
   IDashboardResponse,
@@ -23,12 +23,14 @@ import type {
 import type { AdminRepository } from '../repositories/admin.repository'
 
 export class AdminService {
+  private readonly championBetPoints = 100
+
   constructor(
     private adminRepository: AdminRepository,
     private gameRepository: GameRepository,
     private betRepository: BetRepository,
-    private rankingRepository: RankingRepository,
-    private bonusService: BonusService
+    private bonusService: BonusService,
+    private championBetRepository: ChampionBetRepository
   ) {}
 
   private determinarResultado(
@@ -213,69 +215,92 @@ export class AdminService {
   }
 
   async recalcularPontuacaoGeral(): Promise<IRecalcularResponse> {
-    // Buscar todos os usuários
-    const todosUsuarios = await this.rankingRepository.getRankingPontos()
+    const todosUsuarios = await this.adminRepository.listarUsuarios()
     let usuariosAtualizados = 0
+    let apostasProcessadas = 0
 
     for (const usuario of todosUsuarios) {
       // Buscar estatísticas de apostas do usuário
       const estatisticas = await this.betRepository.getEstatisticasPorUsuario(
-        usuario.userId
+        usuario.id
       )
 
-      if (estatisticas) {
-        // Buscar bônus do usuário
-        const bonusInfo = await this.bonusService.getProgressoUser(
-          usuario.userId
-        )
+      const bonusInfo = await this.bonusService.getProgressoUser(usuario.id)
+      const pontosCampeao =
+        await this.championBetRepository.getPontosPorUsuario(usuario.id)
 
-        // Calcular pontos totais
-        const pontos_apostas = estatisticas.pontos_apostas
-        const pontos_bonus = bonusInfo.bonus_concedido
-        const pontos_total = pontos_apostas + pontos_bonus
+      const pontos_apostas = estatisticas?.pontos_apostas ?? 0
+      apostasProcessadas += estatisticas?.total_apostas ?? 0
+      const pontos_bonus = bonusInfo.bonus_concedido
+      const pontos_total = pontos_apostas + pontos_bonus + pontosCampeao
 
-        // Atualizar tabela de ranking
-        // Nota: Como não temos o repositório de ranking com update, farei diretamente
+      const existing = await db
+        .select()
+        .from(ranking)
+        .where(eq(ranking.userId, usuario.id))
 
-        const existing = await db
-          .select()
-          .from(ranking)
-          .where(eq(ranking.userId, usuario.userId))
-
-        if (existing.length > 0) {
-          await db
-            .update(ranking)
-            .set({
-              pontos_apostas,
-              pontos_bonus,
-              pontos_total,
-              acertos: estatisticas.acertos,
-              total_apostas: estatisticas.total_apostas,
-              updated_at: new Date(),
-            })
-            .where(eq(ranking.userId, usuario.userId))
-        } else {
-          await db.insert(ranking).values({
-            userId: usuario.userId,
+      if (existing.length > 0) {
+        await db
+          .update(ranking)
+          .set({
             pontos_apostas,
             pontos_bonus,
+            pontos_campeao: pontosCampeao,
             pontos_total,
-            acertos: estatisticas.acertos,
-            total_apostas: estatisticas.total_apostas,
+            acertos: estatisticas?.acertos ?? 0,
+            total_apostas: estatisticas?.total_apostas ?? 0,
+            updated_at: new Date(),
           })
-        }
-
-        usuariosAtualizados++
+          .where(eq(ranking.userId, usuario.id))
+      } else {
+        await db.insert(ranking).values({
+          userId: usuario.id,
+          pontos_apostas,
+          pontos_bonus,
+          pontos_campeao: pontosCampeao,
+          pontos_total,
+          acertos: estatisticas?.acertos ?? 0,
+          total_apostas: estatisticas?.total_apostas ?? 0,
+        })
       }
+
+      usuariosAtualizados++
     }
 
     return {
       message: 'Pontuação recalculada com sucesso',
       usuarios_atualizados: usuariosAtualizados,
-      apostas_processadas: todosUsuarios.reduce(
-        (acc, u) => acc + (u.total_apostas || 0),
-        0
-      ),
+      apostas_processadas: apostasProcessadas,
+    }
+  }
+
+  async apurarCampeao(teamId: string): Promise<{
+    message: string
+    campeao: string
+    pontos: number
+    palpites_corretos: number
+  }> {
+    if (!isValidId(teamId)) {
+      throw { statusCode: 400, message: 'ID da seleção inválido' }
+    }
+
+    const team = await this.championBetRepository.findTeamById(teamId)
+    if (!team) {
+      throw { statusCode: 404, message: 'Seleção não encontrada' }
+    }
+
+    const palpitesCorretos = await this.championBetRepository.markChampion(
+      teamId,
+      this.championBetPoints
+    )
+
+    await this.recalcularPontuacaoGeral()
+
+    return {
+      message: 'Palpites de campeão apurados com sucesso',
+      campeao: team.name,
+      pontos: this.championBetPoints,
+      palpites_corretos: palpitesCorretos,
     }
   }
 

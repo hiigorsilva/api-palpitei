@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 import {
+  ApurarCampeaoDTOSchema,
   AtualizarParticipantesBodySchema,
   AtualizarParticipantesLoteSchema,
   CorrigirResultadoDTOSchema,
@@ -69,6 +70,12 @@ export class AdminController {
     const { resultados } = LoteResultadoDTOSchema.parse(request.body)
     const result =
       await this.adminService.inserirMultiplosResultados(resultados)
+    return reply.status(200).send(result)
+  }
+
+  async apurarCampeao(request: FastifyRequest, reply: FastifyReply) {
+    const body = ApurarCampeaoDTOSchema.parse(request.body)
+    const result = await this.adminService.apurarCampeao(body.teamId)
     return reply.status(200).send(result)
   }
 

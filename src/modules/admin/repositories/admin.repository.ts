@@ -7,6 +7,10 @@ import { users } from '../../../db/schemas/users'
 import type { IDashboardResponse } from '../interfaces/admin.interface'
 
 export class AdminRepository {
+  async listarUsuarios(): Promise<Array<{ id: string }>> {
+    return await db.select({ id: users.id }).from(users)
+  }
+
   async buscarTeamPorNome(name: string): Promise<{ id: string } | null> {
     const result = await db
       .select({ id: teams.id })

@@ -16,6 +16,7 @@ export class RankingRepository implements IRankingRepository {
         pontos_total: ranking.pontos_total,
         pontos_apostas: ranking.pontos_apostas,
         pontos_bonus: ranking.pontos_bonus,
+        pontos_campeao: ranking.pontos_campeao,
         acertos: ranking.acertos,
         total_apostas: ranking.total_apostas,
         taxa_acerto: sql<number>`
@@ -48,6 +49,7 @@ export class RankingRepository implements IRankingRepository {
         pontos_total: ranking.pontos_total,
         pontos_apostas: ranking.pontos_apostas,
         pontos_bonus: ranking.pontos_bonus,
+        pontos_campeao: ranking.pontos_campeao,
         acertos: ranking.acertos,
         total_apostas: ranking.total_apostas,
         taxa_acerto: sql<number>`
@@ -92,6 +94,7 @@ export class RankingRepository implements IRankingRepository {
         pontos_total: ranking.pontos_total,
         pontos_apostas: ranking.pontos_apostas,
         pontos_bonus: ranking.pontos_bonus,
+        pontos_campeao: ranking.pontos_campeao,
         acertos: ranking.acertos,
         total_apostas: ranking.total_apostas,
         taxa_acerto: sql<number>`

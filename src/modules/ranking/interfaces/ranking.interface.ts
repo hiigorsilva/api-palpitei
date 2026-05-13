@@ -5,6 +5,7 @@ export interface IRankingItem {
   pontos_total: number
   pontos_apostas: number
   pontos_bonus: number
+  pontos_campeao: number
   acertos: number
   total_apostas: number
   taxa_acerto: number

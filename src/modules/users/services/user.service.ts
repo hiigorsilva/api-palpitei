@@ -1,9 +1,19 @@
 import { isValidId } from '../../../shared/utils/helpers'
-import type { ICreateUserDTO, IUser } from '../interfaces/user.interface'
+import type { ChampionBetRepository } from '../../champion-bets/repositories/champion-bet.repository'
+import type {
+  IChampionBetResponse,
+  ICreateUserDTO,
+  IUser,
+} from '../interfaces/user.interface'
 import type { UserRepository } from '../repositories/user.repository'
 
+const CHAMPION_BET_DEADLINE = new Date('2026-07-14T18:00:00.000Z')
+
 export class UserService {
-  constructor(private userRepository: UserRepository) {}
+  constructor(
+    private userRepository: UserRepository,
+    private championBetRepository: ChampionBetRepository
+  ) {}
 
   private normalizeName(name: string): string {
     return name.trim().replace(/\s+/g, ' ')
@@ -81,5 +91,42 @@ export class UserService {
     }
 
     return await this.userRepository.findById(userId)
+  }
+
+  async chooseChampionBet(
+    userId: string,
+    teamId: string
+  ): Promise<IChampionBetResponse> {
+    if (!isValidId(userId)) {
+      throw { statusCode: 400, message: 'ID do usuário inválido' }
+    }
+
+    if (!isValidId(teamId)) {
+      throw { statusCode: 400, message: 'ID da seleção inválido' }
+    }
+
+    if (new Date() > CHAMPION_BET_DEADLINE) {
+      throw {
+        statusCode: 400,
+        message: 'Não é mais possível apostar no campeão.',
+      }
+    }
+
+    const user = await this.userRepository.findById(userId)
+    if (!user) {
+      throw { statusCode: 404, message: 'Usuário não encontrado' }
+    }
+
+    const team = await this.championBetRepository.findTeamById(teamId)
+    if (!team) {
+      throw { statusCode: 404, message: 'Seleção não encontrada' }
+    }
+
+    const championBet = await this.championBetRepository.upsert(userId, teamId)
+
+    return {
+      ...championBet,
+      teamName: team.name,
+    }
   }
 }

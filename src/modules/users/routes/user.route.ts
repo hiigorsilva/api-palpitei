@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { userController } from '../instances/user.instance'
 import {
+  chooseChampionBetSchema,
   createUserSchema,
   getUserByIdSchema,
   listUsersSchema,
@@ -24,5 +25,11 @@ export const userRoute = async (app: FastifyInstance) => {
 
   app.get('/users/:id', getUserByIdSchema, (request, reply) =>
     userController.getById(request, reply)
+  )
+
+  app.put(
+    '/users/:userId/palpite-campeao',
+    chooseChampionBetSchema,
+    (request, reply) => userController.chooseChampionBet(request, reply)
   )
 }

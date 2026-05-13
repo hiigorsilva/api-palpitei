@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 const teamDetailsResponseSchema = z
   .object({
+    id: z.string(),
     name: z.string(),
     flag: z.string().nullable(),
     continent: z.string().nullable(),
@@ -11,6 +12,7 @@ const teamDetailsResponseSchema = z
     fifa_code: z.string().nullable(),
     group: z.enum(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']),
     confed: z.string().nullable(),
+    isPalpiteCampeao: z.boolean(),
   })
   .nullable()
 
