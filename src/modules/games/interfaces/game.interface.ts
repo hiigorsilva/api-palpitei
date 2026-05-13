@@ -15,7 +15,7 @@ export interface IGame {
 
 export const GameFaseSchema = z.enum([
   'GRUPOS',
-  '32_AVOS',
+  '16_AVOS',
   'OITAVAS',
   'QUARTAS',
   'SEMI',

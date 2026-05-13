@@ -25,10 +25,10 @@ const paramsSchema = z.object({
 const querySchema = z.object({
   fase: z
     .enum(
-      ['GRUPOS', '32_AVOS', 'OITAVAS', 'QUARTAS', 'SEMI', 'FINAL', 'TERCEIRO'],
+      ['GRUPOS', '16_AVOS', 'OITAVAS', 'QUARTAS', 'SEMI', 'FINAL', 'TERCEIRO'],
       {
         error:
-          'Fase inválida. Informe a fase correta: GRUPOS, 32_AVOS, OITAVAS, QUARTAS, SEMI, FINAL ou TERCEIRO',
+          'Fase inválida. Informe a fase correta: GRUPOS, 16_AVOS, OITAVAS, QUARTAS, SEMI, FINAL ou TERCEIRO',
       }
     )
     .optional(),

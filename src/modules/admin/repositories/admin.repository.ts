@@ -81,7 +81,7 @@ export class AdminRepository {
     team_b: string
     fase:
       | 'GRUPOS'
-      | '32_AVOS'
+      | '16_AVOS'
       | 'OITAVAS'
       | 'QUARTAS'
       | 'SEMI'

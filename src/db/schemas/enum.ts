@@ -2,7 +2,7 @@ import { pgEnum } from 'drizzle-orm/pg-core'
 
 export const faseEnum = pgEnum('fase', [
   'GRUPOS',
-  '32_AVOS',
+  '16_AVOS',
   'OITAVAS',
   'QUARTAS',
   'SEMI',

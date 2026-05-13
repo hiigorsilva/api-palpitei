@@ -1,6 +1,6 @@
 export const faseOptions = [
   'GRUPOS',
-  '32_AVOS',
+  '16_AVOS',
   'OITAVAS',
   'QUARTAS',
   'SEMI',
@@ -16,7 +16,7 @@ export const statusOptions = ['FUTURO', 'ENCERRADO']
  * Jogos de grupos são detectados no serviço pela presença do campo `group`.
  */
 export const roundToFaseMap: Record<string, string> = {
-  'Fase de 32 avos': '32_AVOS',
+  'Fase de 16 avos': '16_AVOS',
   'Oitavas de final': 'OITAVAS',
   'Quartas de final': 'QUARTAS',
   Semifinal: 'SEMI',
