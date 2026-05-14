@@ -52,6 +52,7 @@ export class BetRepository implements IBetRepository {
     gameId: string
     palpite: string
     acertou: boolean | null
+    pontos: number
     usou_carta_dobro_pontos: boolean
     created_at: Date
     updated_at: Date
@@ -60,6 +61,7 @@ export class BetRepository implements IBetRepository {
       ...data,
       palpite: palpiteSchema.parse(data.palpite),
       acertou: data.acertou ?? false,
+      pontos: data.pontos,
       usou_carta_dobro_pontos: data.usou_carta_dobro_pontos,
       created_at: data.created_at.toISOString(),
       updated_at: data.updated_at.toISOString(),
@@ -72,6 +74,7 @@ export class BetRepository implements IBetRepository {
     gameId: string
     palpite: string
     acertou: boolean | null
+    pontos: number
     usou_carta_dobro_pontos: boolean
     created_at: Date
     updated_at: Date
@@ -107,6 +110,7 @@ export class BetRepository implements IBetRepository {
       gameId: data.gameId,
       palpite: palpiteSchema.parse(data.palpite),
       acertou: data.acertou ?? false,
+      pontos: data.pontos,
       usou_carta_dobro_pontos: data.usou_carta_dobro_pontos,
       created_at: data.created_at.toISOString(),
       updated_at: data.updated_at.toISOString(),
@@ -203,6 +207,7 @@ export class BetRepository implements IBetRepository {
         gameId: bet.gameId,
         palpite: bet.palpite,
         acertou: bet.acertou,
+        pontos: bet.pontos,
         usou_carta_dobro_pontos: bet.usou_carta_dobro_pontos,
         created_at: bet.created_at,
         updated_at: bet.updated_at,
@@ -275,7 +280,7 @@ export class BetRepository implements IBetRepository {
       .select({
         acertos: sql<number>`cast(count(*) filter (where ${bet.acertou} = true) as int)`,
         total_apostas: count(),
-        pontos_apostas: sql<number>`cast(coalesce(sum(case when ${bet.acertou} = true then case when ${bet.usou_carta_dobro_pontos} = true then 6 else 3 end else 0 end), 0) as int)`,
+        pontos_apostas: sql<number>`cast(coalesce(sum(${bet.pontos}), 0) as int)`,
       })
       .from(bet)
       .where(eq(bet.userId, userId))

@@ -23,7 +23,7 @@ import type {
 import type { AdminRepository } from '../repositories/admin.repository'
 
 export class AdminService {
-  private readonly championBetPoints = 100
+  private readonly championBetPoints = 50
 
   constructor(
     private adminRepository: AdminRepository,
@@ -47,6 +47,17 @@ export class AdminService {
     resultado: 'A' | 'B' | 'EMPATE'
   ): boolean {
     return palpite === resultado
+  }
+
+  private calcularPontosAposta(
+    palpite: string,
+    resultado: 'A' | 'B' | 'EMPATE',
+    usouCartaDobroPontos: boolean
+  ): number {
+    if (!this.verificarAcerto(palpite, resultado)) return 0
+
+    const pontosBase = resultado === 'EMPATE' ? 5 : 7
+    return usouCartaDobroPontos ? pontosBase * 2 : pontosBase
   }
 
   private mapearFase(round: string, group?: string): GameFase {
@@ -141,7 +152,16 @@ export class AdminService {
     const apostas = await this.adminRepository.buscarApostasPorJogo(data.gameId)
     for (const aposta of apostas) {
       const acertou = this.verificarAcerto(aposta.palpite, resultadoReal)
-      await this.adminRepository.atualizarAcertoAposta(aposta.id, acertou)
+      const pontos = this.calcularPontosAposta(
+        aposta.palpite,
+        resultadoReal,
+        aposta.usou_carta_dobro_pontos
+      )
+      await this.adminRepository.atualizarAcertoAposta(
+        aposta.id,
+        acertou,
+        pontos
+      )
     }
 
     return { team_a: game.team_a, team_b: game.team_b }
@@ -362,7 +382,16 @@ export class AdminService {
     const apostas = await this.adminRepository.buscarApostasPorJogo(gameId)
     for (const aposta of apostas) {
       const acertou = this.verificarAcerto(aposta.palpite, resultadoReal)
-      await this.adminRepository.atualizarAcertoAposta(aposta.id, acertou)
+      const pontos = this.calcularPontosAposta(
+        aposta.palpite,
+        resultadoReal,
+        aposta.usou_carta_dobro_pontos
+      )
+      await this.adminRepository.atualizarAcertoAposta(
+        aposta.id,
+        acertou,
+        pontos
+      )
     }
 
     await this.recalcularPontuacaoGeral()

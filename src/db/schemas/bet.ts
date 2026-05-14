@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm'
 import {
   boolean,
   index,
+  integer,
   pgTable,
   serial,
   timestamp,
@@ -28,6 +29,7 @@ export const bet = pgTable(
 
     // resultado (calculado após jogo encerrar)
     acertou: boolean('acertou').default(false),
+    pontos: integer('pontos').default(0).notNull(),
     usou_carta_dobro_pontos: boolean('usou_carta_dobro_pontos')
       .default(false)
       .notNull(),

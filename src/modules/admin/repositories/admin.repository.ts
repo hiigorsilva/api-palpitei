@@ -180,8 +180,10 @@ export class AdminRepository {
   }
 
   async resetarPontuacaoJogo(gameId: string): Promise<void> {
-    // Resetar acertou das bet deste jogo
-    await db.update(bet).set({ acertou: false }).where(eq(bet.gameId, gameId))
+    await db
+      .update(bet)
+      .set({ acertou: false, pontos: 0, updated_at: new Date() })
+      .where(eq(bet.gameId, gameId))
   }
 
   async buscarApostasPorJogo(gameId: string): Promise<
@@ -189,6 +191,7 @@ export class AdminRepository {
       id: number
       userId: string
       palpite: string
+      usou_carta_dobro_pontos: boolean
     }>
   > {
     return await db
@@ -196,6 +199,7 @@ export class AdminRepository {
         id: bet.id,
         userId: bet.userId,
         palpite: bet.palpite,
+        usou_carta_dobro_pontos: bet.usou_carta_dobro_pontos,
       })
       .from(bet)
       .where(eq(bet.gameId, gameId))
@@ -203,11 +207,12 @@ export class AdminRepository {
 
   async atualizarAcertoAposta(
     aposta_id: number,
-    acertou: boolean
+    acertou: boolean,
+    pontos: number
   ): Promise<void> {
     await db
       .update(bet)
-      .set({ acertou, updated_at: new Date() })
+      .set({ acertou, pontos, updated_at: new Date() })
       .where(eq(bet.id, aposta_id))
   }
 
