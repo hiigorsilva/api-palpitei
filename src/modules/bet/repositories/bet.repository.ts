@@ -52,6 +52,7 @@ export class BetRepository implements IBetRepository {
     gameId: string
     palpite: string
     acertou: boolean | null
+    usou_carta_dobro_pontos: boolean
     created_at: Date
     updated_at: Date
   }): IBet {
@@ -59,6 +60,7 @@ export class BetRepository implements IBetRepository {
       ...data,
       palpite: palpiteSchema.parse(data.palpite),
       acertou: data.acertou ?? false,
+      usou_carta_dobro_pontos: data.usou_carta_dobro_pontos,
       created_at: data.created_at.toISOString(),
       updated_at: data.updated_at.toISOString(),
     }
@@ -70,6 +72,7 @@ export class BetRepository implements IBetRepository {
     gameId: string
     palpite: string
     acertou: boolean | null
+    usou_carta_dobro_pontos: boolean
     created_at: Date
     updated_at: Date
     username: string
@@ -104,6 +107,7 @@ export class BetRepository implements IBetRepository {
       gameId: data.gameId,
       palpite: palpiteSchema.parse(data.palpite),
       acertou: data.acertou ?? false,
+      usou_carta_dobro_pontos: data.usou_carta_dobro_pontos,
       created_at: data.created_at.toISOString(),
       updated_at: data.updated_at.toISOString(),
       username: data.username,
@@ -141,13 +145,40 @@ export class BetRepository implements IBetRepository {
   async create(
     userId: string,
     gameId: string,
-    palpite: Palpite
+    palpite: Palpite,
+    usarCartaDobroPontos = false
   ): Promise<IBet> {
-    const result = await db
-      .insert(bet)
-      .values({ userId, gameId, palpite })
-      .returning()
-    return this.toIBet(result[0])
+    return await db.transaction(async tx => {
+      if (usarCartaDobroPontos) {
+        const updatedUser = await tx
+          .update(users)
+          .set({
+            carta_dobro_pontos: sql`${users.carta_dobro_pontos} - 1`,
+          })
+          .where(
+            and(eq(users.id, userId), sql`${users.carta_dobro_pontos} > 0`)
+          )
+          .returning({ id: users.id })
+
+        if (!updatedUser[0]) {
+          throw {
+            statusCode: 400,
+            message: 'Você não possui cartas de dobro de pontos disponíveis.',
+          }
+        }
+      }
+
+      const result = await tx
+        .insert(bet)
+        .values({
+          userId,
+          gameId,
+          palpite,
+          usou_carta_dobro_pontos: usarCartaDobroPontos,
+        })
+        .returning()
+      return this.toIBet(result[0])
+    })
   }
 
   async update(id: number, palpite: Palpite): Promise<IBet> {
@@ -172,6 +203,7 @@ export class BetRepository implements IBetRepository {
         gameId: bet.gameId,
         palpite: bet.palpite,
         acertou: bet.acertou,
+        usou_carta_dobro_pontos: bet.usou_carta_dobro_pontos,
         created_at: bet.created_at,
         updated_at: bet.updated_at,
         username: users.name,
@@ -243,6 +275,7 @@ export class BetRepository implements IBetRepository {
       .select({
         acertos: sql<number>`cast(count(*) filter (where ${bet.acertou} = true) as int)`,
         total_apostas: count(),
+        pontos_apostas: sql<number>`cast(coalesce(sum(case when ${bet.acertou} = true then case when ${bet.usou_carta_dobro_pontos} = true then 6 else 3 end else 0 end), 0) as int)`,
       })
       .from(bet)
       .where(eq(bet.userId, userId))
@@ -251,7 +284,7 @@ export class BetRepository implements IBetRepository {
     return {
       acertos: row.acertos,
       total_apostas: row.total_apostas,
-      pontos_apostas: row.acertos * 3,
+      pontos_apostas: row.pontos_apostas,
     }
   }
 }

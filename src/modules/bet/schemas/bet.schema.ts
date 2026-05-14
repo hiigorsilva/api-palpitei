@@ -22,6 +22,7 @@ const betResponseSchema = z.object({
   gameId: z.string(),
   palpite: z.enum(['A', 'B', 'EMPATE']),
   acertou: z.boolean(),
+  usou_carta_dobro_pontos: z.boolean(),
   created_at: z.string(),
   updated_at: z.string(),
 })
@@ -32,6 +33,7 @@ const betFullResponseSchema = z.object({
   gameId: z.string(),
   palpite: z.enum(['A', 'B', 'EMPATE']),
   acertou: z.boolean(),
+  usou_carta_dobro_pontos: z.boolean(),
   created_at: z.string(),
   updated_at: z.string(),
   username: z.string(),
@@ -53,6 +55,7 @@ const createBetBodyBodySchema = z.object({
   palpite: z.enum(['A', 'B', 'EMPATE'], {
     error: 'Palpite inválido. Informe os valores corretos: A, B ou EMPATE',
   }),
+  usar_carta_dobro_pontos: z.boolean().optional().default(false),
 })
 
 const editBetBodySchema = z.object({

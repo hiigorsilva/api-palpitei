@@ -1,9 +1,11 @@
 import { isValidId } from '../../../shared/utils/helpers'
+import type { BonusService } from '../../bonus-progresso/services/bonus-progresso.service'
 import type { ChampionBetRepository } from '../../champion-bets/repositories/champion-bet.repository'
 import type {
   IChampionBetResponse,
   ICreateUserDTO,
   IUser,
+  IUserWithProgress,
 } from '../interfaces/user.interface'
 import type { UserRepository } from '../repositories/user.repository'
 
@@ -12,7 +14,8 @@ const CHAMPION_BET_DEADLINE = new Date('2026-07-14T18:00:00.000Z')
 export class UserService {
   constructor(
     private userRepository: UserRepository,
-    private championBetRepository: ChampionBetRepository
+    private championBetRepository: ChampionBetRepository,
+    private bonusService: BonusService
   ) {}
 
   private normalizeName(name: string): string {
@@ -77,11 +80,26 @@ export class UserService {
     }
   }
 
-  async listUsers(): Promise<IUser[]> {
-    return await this.userRepository.findAll()
+  private async toUserWithProgress(user: IUser): Promise<IUserWithProgress> {
+    const progress = await this.bonusService.getProgressoUser(user.id)
+
+    return {
+      ...user,
+      bonus_concedido: progress.bonus_concedido,
+      jogos_apostados: progress.jogos_apostados,
+      nivel_atual: progress.nivel_atual,
+      percentual: progress.percentual,
+      proximo_nivel: progress.proximo_nivel,
+      total_jogos: progress.total_jogos,
+    }
   }
 
-  async getUserById(userId: string): Promise<IUser | null> {
+  async listUsers(): Promise<IUserWithProgress[]> {
+    const users = await this.userRepository.findAll()
+    return await Promise.all(users.map(user => this.toUserWithProgress(user)))
+  }
+
+  async getUserById(userId: string): Promise<IUserWithProgress | null> {
     if (!userId) {
       throw { statusCode: 400, message: 'ID do usuário é obrigatório' }
     }
@@ -90,7 +108,8 @@ export class UserService {
       throw { statusCode: 400, message: 'ID do usuário inválido' }
     }
 
-    return await this.userRepository.findById(userId)
+    const user = await this.userRepository.findById(userId)
+    return user ? await this.toUserWithProgress(user) : null
   }
 
   async chooseChampionBet(

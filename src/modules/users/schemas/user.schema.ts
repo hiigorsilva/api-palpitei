@@ -4,7 +4,23 @@ import { z } from 'zod'
 const userResponseSchema = z.object({
   id: z.string(),
   name: z.string(),
+  carta_dobro_pontos: z.number(),
   created_at: z.date().transform(date => date.toISOString()),
+})
+
+const nextUserLevelResponseSchema = z.object({
+  nivel: z.string(),
+  bonusPontos: z.number(),
+  minimoPercentual: z.number(),
+})
+
+const userWithProgressResponseSchema = userResponseSchema.extend({
+  bonus_concedido: z.number(),
+  jogos_apostados: z.number(),
+  nivel_atual: z.string(),
+  percentual: z.number(),
+  proximo_nivel: nextUserLevelResponseSchema.nullable(),
+  total_jogos: z.number(),
 })
 
 const championBetResponseSchema = z.object({
@@ -67,7 +83,7 @@ export const listUsersSchema: RouteShorthandOptions = {
     summary: 'Lista todos os usuários',
     tags: ['Usuários'],
     response: {
-      200: z.array(userResponseSchema),
+      200: z.array(userWithProgressResponseSchema),
       400: errorResponseSchema,
       500: errorResponseSchema,
     },
@@ -82,7 +98,7 @@ export const getUserByIdSchema: RouteShorthandOptions = {
       id: z.string(),
     }),
     response: {
-      200: userResponseSchema,
+      200: userWithProgressResponseSchema,
       404: errorResponseSchema,
       400: errorResponseSchema,
       500: errorResponseSchema,

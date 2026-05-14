@@ -27,7 +27,8 @@ export class BetService {
   async createBet(
     userId: string,
     gameId: string,
-    palpite: Palpite
+    palpite: Palpite,
+    usarCartaDobroPontos = false
   ): Promise<IBet> {
     // Verificar se o ID do jogo é válido (uuid)
     if (!isValidId(gameId)) {
@@ -62,7 +63,12 @@ export class BetService {
       }
     }
 
-    return await this.betRepository.create(userId, gameId, palpite)
+    return await this.betRepository.create(
+      userId,
+      gameId,
+      palpite,
+      usarCartaDobroPontos
+    )
   }
 
   async editBet(id: number, userId: string, palpite: Palpite): Promise<IBet> {

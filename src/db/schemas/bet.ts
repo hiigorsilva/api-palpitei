@@ -28,6 +28,9 @@ export const bet = pgTable(
 
     // resultado (calculado após jogo encerrar)
     acertou: boolean('acertou').default(false),
+    usou_carta_dobro_pontos: boolean('usou_carta_dobro_pontos')
+      .default(false)
+      .notNull(),
 
     // controle
     created_at: timestamp('created_at').defaultNow().notNull(),
