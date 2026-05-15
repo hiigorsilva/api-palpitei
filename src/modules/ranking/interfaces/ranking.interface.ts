@@ -11,13 +11,26 @@ export interface IRankingItem {
   taxa_acerto: number
 }
 
+export interface IChampionBetRankingInfo {
+  teamId: string
+  name: string
+  code: string | null
+  flag: string | null
+  acertou: boolean
+  pontos: number
+}
+
+export interface IUserRankingStats extends IRankingItem {
+  palpite_campeao: IChampionBetRankingInfo | null
+}
+
 export interface IRankingRepository {
   getRankingPontos(): Promise<IRankingItem[]>
   getRankingTaxaAcerto(minimoApostas?: number): Promise<IRankingItem[]>
   getUserPosition(
     userId: string
   ): Promise<{ position: number; total_usuarios: number } | null>
-  getEstatisticasUsuario(userId: string): Promise<IRankingItem | null>
+  getEstatisticasUsuario(userId: string): Promise<IUserRankingStats | null>
 }
 
 export interface IBonusRepository {

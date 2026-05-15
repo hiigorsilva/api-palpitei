@@ -3,11 +3,11 @@ import { z } from 'zod'
 import type { RankingService } from '../services/ranking.service'
 
 const paramsSchema = z.object({
-  userId: z.string(),
+  userId: z.string().uuid('ID do usuário inválido'),
 })
 
 const querySchema = z.object({
-  min_apostas: z.number(),
+  min_apostas: z.coerce.number().int().min(0).optional().default(0),
 })
 
 export class RankingController {

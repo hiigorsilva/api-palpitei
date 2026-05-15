@@ -14,16 +14,29 @@ const rankingItemSchema = z.object({
   taxa_acerto: z.number(),
 })
 
+const championBetRankingSchema = z.object({
+  teamId: z.string(),
+  name: z.string(),
+  code: z.string().nullable(),
+  flag: z.string().nullable(),
+  acertou: z.boolean(),
+  pontos: z.number(),
+})
+
+const userRankingStatsSchema = rankingItemSchema.extend({
+  palpite_campeao: championBetRankingSchema.nullable(),
+})
+
 const errorResponseSchema = z.object({
   message: z.string(),
 })
 
 const paramsSchema = z.object({
-  userId: z.string(),
+  userId: z.string().uuid('ID do usuário inválido'),
 })
 
 const querySchema = z.object({
-  min_apostas: z.string().optional(),
+  min_apostas: z.coerce.number().int().min(0).optional(),
 })
 
 const posicaoResponseSchema = z.object({
@@ -79,7 +92,7 @@ export const getEstatisticasUsuarioSchema: RouteShorthandOptions = {
     tags: ['Ranking'],
     params: paramsSchema,
     response: {
-      200: rankingItemSchema,
+      200: userRankingStatsSchema,
       404: errorResponseSchema,
       500: errorResponseSchema,
     },

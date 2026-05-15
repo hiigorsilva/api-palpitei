@@ -1,4 +1,7 @@
-import type { IRankingItem } from '../interfaces/ranking.interface'
+import type {
+  IRankingItem,
+  IUserRankingStats,
+} from '../interfaces/ranking.interface'
 import type { RankingRepository } from '../repositories/ranking.repository'
 
 export class RankingService {
@@ -20,7 +23,9 @@ export class RankingService {
     return await this.rankingRepository.getUserPosition(userId)
   }
 
-  async getEstatisticasUsuario(userId: string): Promise<IRankingItem | null> {
+  async getEstatisticasUsuario(
+    userId: string
+  ): Promise<IUserRankingStats | null> {
     return await this.rankingRepository.getEstatisticasUsuario(userId)
   }
 }

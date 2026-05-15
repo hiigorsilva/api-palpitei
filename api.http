@@ -1,0 +1,27 @@
+# Variables
+@baseUrl = http://localhost:3333/api
+@userId = 
+
+# @name GetStatisticsUser
+GET {{baseUrl}}/ranking/users/{{userId}}
+content-type: application/json
+
+###
+
+# @name GetUserRankingPosition
+GET {{baseUrl}}/ranking/users/{{userId}}/position
+content-type: application/json
+
+###
+
+# @name GetUserRankingTaxa
+GET {{baseUrl}}/ranking/taxa
+content-type: application/json
+
+###
+
+# @name GetUserRankingPontos
+GET {{baseUrl}}/ranking/pontos
+content-type: application/json
+
+###
