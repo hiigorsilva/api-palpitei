@@ -9,6 +9,7 @@ export interface IBet {
   acertou: boolean
   pontos: number
   usou_carta_dobro_pontos: boolean
+  carta_dobro_pontos?: number
   created_at: string
   updated_at: string
 }

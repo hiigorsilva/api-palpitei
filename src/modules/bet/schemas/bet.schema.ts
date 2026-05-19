@@ -24,6 +24,7 @@ const betResponseSchema = z.object({
   acertou: z.boolean(),
   pontos: z.number(),
   usou_carta_dobro_pontos: z.boolean(),
+  carta_dobro_pontos: z.number().optional(),
   created_at: z.string(),
   updated_at: z.string(),
 })
@@ -36,6 +37,7 @@ const betFullResponseSchema = z.object({
   acertou: z.boolean(),
   pontos: z.number(),
   usou_carta_dobro_pontos: z.boolean(),
+  carta_dobro_pontos: z.number().optional(),
   created_at: z.string(),
   updated_at: z.string(),
   username: z.string(),
