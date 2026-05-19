@@ -5,6 +5,7 @@ import { bet } from '../../../db/schemas/bet'
 import { championBets } from '../../../db/schemas/champion-bets'
 import { games } from '../../../db/schemas/games'
 import { teams } from '../../../db/schemas/teams'
+import { users } from '../../../db/schemas/users'
 import type { ITeamDetails } from '../../teams/interfaces/team.interface'
 import type {
   GameFase,
@@ -63,6 +64,8 @@ export class GameRepository implements IGameRepository {
   }
 
   private selectWithTeams(userId?: string) {
+    const effectiveUserId = userId ?? EMPTY_USER_ID
+
     return db
       .select({
         id: games.id,
@@ -76,6 +79,7 @@ export class GameRepository implements IGameRepository {
         has_palpite: sql<boolean>`exists (
           select 1 from ${bet}
           where ${bet.gameId} = ${games.id}
+            and ${bet.userId} = ${effectiveUserId}
         )`,
         created_at: games.created_at,
         updated_at: games.updated_at,
@@ -225,6 +229,31 @@ export class GameRepository implements IGameRepository {
   async contarTotalJogos(): Promise<number> {
     const result = await db.select({ count: count() }).from(games)
     return result[0]?.count ?? 0
+  }
+
+  async getBetsByGame(gameId: string) {
+    const result = await db
+      .select({
+        userId: bet.userId,
+        name: users.name,
+        palpite: bet.palpite,
+        usou_carta_dobro_pontos: bet.usou_carta_dobro_pontos,
+        acertou: bet.acertou,
+        pontos: bet.pontos,
+      })
+      .from(bet)
+      .innerJoin(users, eq(bet.userId, users.id))
+      .where(eq(bet.gameId, gameId))
+      .orderBy(bet.created_at)
+
+    return result.map(item => ({
+      userId: item.userId,
+      name: item.name,
+      palpite: item.palpite as 'A' | 'B' | 'EMPATE',
+      usou_carta_dobro_pontos: item.usou_carta_dobro_pontos,
+      acertou: item.acertou ?? false,
+      pontos: item.pontos,
+    }))
   }
 
   async listPendentes(userId?: string): Promise<IGame[]> {

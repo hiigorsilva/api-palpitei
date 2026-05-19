@@ -1,10 +1,12 @@
 import { isValidId } from '../../../shared/utils/helpers'
+import type { BetRepository } from '../../bet/repositories/bet.repository'
 import type { BonusService } from '../../bonus-progresso/services/bonus-progresso.service'
 import type { ChampionBetRepository } from '../../champion-bets/repositories/champion-bet.repository'
 import type {
   IChampionBetResponse,
   ICreateUserDTO,
   IUser,
+  IUserCartaHistoricoResponse,
   IUserWithProgress,
 } from '../interfaces/user.interface'
 import type { UserRepository } from '../repositories/user.repository'
@@ -15,7 +17,8 @@ export class UserService {
   constructor(
     private userRepository: UserRepository,
     private championBetRepository: ChampionBetRepository,
-    private bonusService: BonusService
+    private bonusService: BonusService,
+    private betRepository: BetRepository
   ) {}
 
   private normalizeName(name: string): string {
@@ -147,5 +150,20 @@ export class UserService {
       ...championBet,
       teamName: team.name,
     }
+  }
+
+  async getCartaHistorico(
+    userId: string
+  ): Promise<IUserCartaHistoricoResponse[]> {
+    if (!isValidId(userId)) {
+      throw { statusCode: 400, message: 'ID do usuário inválido' }
+    }
+
+    const user = await this.userRepository.findById(userId)
+    if (!user) {
+      throw { statusCode: 404, message: 'Usuário não encontrado' }
+    }
+
+    return await this.betRepository.getCartaHistoricoByUser(userId)
   }
 }

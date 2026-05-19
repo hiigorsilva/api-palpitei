@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { Palpite } from '../../bet/interfaces/bet.interface'
 import type { ITeamDetails } from '../../teams/interfaces/team.interface'
 
 export interface IGame {
@@ -15,6 +16,15 @@ export interface IGame {
   has_palpite: boolean
   created_at: Date
   updated_at: Date
+}
+
+export interface IGameBetResponse {
+  userId: string
+  name: string
+  palpite: Palpite
+  usou_carta_dobro_pontos: boolean
+  acertou: boolean
+  pontos: number
 }
 
 export const GameFaseSchema = z.enum([
@@ -36,6 +46,7 @@ export interface IGameRepository {
   getById(id: string, userId?: string): Promise<IGame | null>
   listByFase(fase: GameFase, userId?: string): Promise<IGame[]>
   listByStatus(status: GameStatus, userId?: string): Promise<IGame[]>
+  getBetsByGame(gameId: string): Promise<IGameBetResponse[]>
   updateResult(id: string, gols_a: number, gols_b: number): Promise<IGame>
   contarTotalJogos(): Promise<number>
   listPendentes(userId?: string): Promise<IGame[]>

@@ -5,7 +5,9 @@ import { bet } from '../../../db/schemas/bet'
 import { games } from '../../../db/schemas/games'
 import { teams } from '../../../db/schemas/teams'
 import { users } from '../../../db/schemas/users'
+import type { IGameBetResponse } from '../../games/interfaces/game.interface'
 import type { Grupo, ITeamDetails } from '../../teams/interfaces/team.interface'
+import type { IUserCartaHistoricoResponse } from '../../users/interfaces/user.interface'
 import type {
   IBet,
   IBetFull,
@@ -250,6 +252,60 @@ export class BetRepository implements IBetRepository {
   async getByGame(gameId: string): Promise<IBet[]> {
     const result = await db.select().from(bet).where(eq(bet.gameId, gameId))
     return result.map(betData => this.toIBet(betData))
+  }
+
+  async getBetsByGame(gameId: string): Promise<IGameBetResponse[]> {
+    const result = await db
+      .select({
+        userId: bet.userId,
+        name: users.name,
+        palpite: bet.palpite,
+        usou_carta_dobro_pontos: bet.usou_carta_dobro_pontos,
+        acertou: bet.acertou,
+        pontos: bet.pontos,
+      })
+      .from(bet)
+      .innerJoin(users, eq(bet.userId, users.id))
+      .where(eq(bet.gameId, gameId))
+      .orderBy(bet.created_at)
+
+    return result.map(item => ({
+      userId: item.userId,
+      name: item.name,
+      palpite: palpiteSchema.parse(item.palpite),
+      usou_carta_dobro_pontos: item.usou_carta_dobro_pontos,
+      acertou: item.acertou ?? false,
+      pontos: item.pontos,
+    }))
+  }
+
+  async getCartaHistoricoByUser(
+    userId: string
+  ): Promise<IUserCartaHistoricoResponse[]> {
+    const result = await db
+      .select({
+        gameId: bet.gameId,
+        team_a: games.team_a,
+        team_b: games.team_b,
+        data_hora: games.data_hora,
+        palpite: bet.palpite,
+        acertou: bet.acertou,
+        pontos: bet.pontos,
+      })
+      .from(bet)
+      .innerJoin(games, eq(bet.gameId, games.id))
+      .where(and(eq(bet.userId, userId), eq(bet.usou_carta_dobro_pontos, true)))
+      .orderBy(games.data_hora)
+
+    return result.map(item => ({
+      gameId: item.gameId,
+      team_a: item.team_a,
+      team_b: item.team_b,
+      data_hora: item.data_hora.toISOString(),
+      palpite: palpiteSchema.parse(item.palpite),
+      acertou: item.acertou ?? false,
+      pontos: item.pontos,
+    }))
   }
 
   async getBetByUserGame(userId: string, gameId: string): Promise<IBet | null> {

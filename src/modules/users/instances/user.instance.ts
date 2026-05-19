@@ -21,6 +21,7 @@ const bonusService = new BonusService(
 const userService = new UserService(
   userRepository,
   championBetRepository,
-  bonusService
+  bonusService,
+  betRepository
 )
 export const userController = new UserController(userService)

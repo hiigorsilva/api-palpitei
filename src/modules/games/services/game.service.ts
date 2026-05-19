@@ -1,8 +1,12 @@
+import type { BetRepository } from '../../bet/repositories/bet.repository'
 import type { GameFase, GameStatus, IGame } from '../interfaces/game.interface'
 import type { GameRepository } from '../repositories/game.repository'
 
 export class GameService {
-  constructor(private gameRepository: GameRepository) {}
+  constructor(
+    private gameRepository: GameRepository,
+    private betRepository: BetRepository
+  ) {}
 
   async listAll(userId?: string): Promise<IGame[]> {
     return await this.gameRepository.listAll(userId)
@@ -22,6 +26,15 @@ export class GameService {
 
   async listByStatus(status: GameStatus, userId?: string): Promise<IGame[]> {
     return await this.gameRepository.listByStatus(status, userId)
+  }
+
+  async listBetsByGame(gameId: string) {
+    const game = await this.gameRepository.getById(gameId)
+    if (!game) {
+      throw { statusCode: 404, message: 'Jogo não encontrado' }
+    }
+
+    return await this.betRepository.getBetsByGame(gameId)
   }
 
   async listPendentes(userId?: string): Promise<IGame[]> {
