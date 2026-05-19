@@ -187,13 +187,64 @@ export class BetRepository implements IBetRepository {
     })
   }
 
-  async update(id: number, palpite: Palpite): Promise<IBet> {
-    const result = await db
-      .update(bet)
-      .set({ palpite, updated_at: new Date() })
-      .where(eq(bet.id, id))
-      .returning()
-    return this.toIBet(result[0])
+  async update(
+    id: number,
+    userId: string,
+    palpite: Palpite,
+    usarCartaDobroPontos?: boolean
+  ): Promise<IBet> {
+    return await db.transaction(async tx => {
+      const currentBet = await tx
+        .select({
+          id: bet.id,
+          usou_carta_dobro_pontos: bet.usou_carta_dobro_pontos,
+        })
+        .from(bet)
+        .where(eq(bet.id, id))
+
+      const currentUseCard = currentBet[0]?.usou_carta_dobro_pontos ?? false
+      const shouldUseCard = usarCartaDobroPontos ?? currentUseCard
+
+      if (!currentUseCard && shouldUseCard) {
+        const updatedUser = await tx
+          .update(users)
+          .set({
+            carta_dobro_pontos: sql`${users.carta_dobro_pontos} - 1`,
+          })
+          .where(
+            and(eq(users.id, userId), sql`${users.carta_dobro_pontos} > 0`)
+          )
+          .returning({ id: users.id })
+
+        if (!updatedUser[0]) {
+          throw {
+            statusCode: 400,
+            message: 'Você não possui cartas de dobro de pontos disponíveis.',
+          }
+        }
+      }
+
+      if (currentUseCard && !shouldUseCard) {
+        await tx
+          .update(users)
+          .set({
+            carta_dobro_pontos: sql`${users.carta_dobro_pontos} + 1`,
+          })
+          .where(eq(users.id, userId))
+      }
+
+      const result = await tx
+        .update(bet)
+        .set({
+          palpite,
+          usou_carta_dobro_pontos: shouldUseCard,
+          updated_at: new Date(),
+        })
+        .where(eq(bet.id, id))
+        .returning()
+
+      return this.toIBet(result[0])
+    })
   }
 
   async getById(id: number): Promise<IBet | null> {

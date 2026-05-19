@@ -71,7 +71,12 @@ export class BetService {
     )
   }
 
-  async editBet(id: number, userId: string, palpite: Palpite): Promise<IBet> {
+  async editBet(
+    id: number,
+    userId: string,
+    palpite: Palpite,
+    usarCartaDobroPontos?: boolean
+  ): Promise<IBet> {
     // Verificar se o ID do usuário é válido (uuid)
     if (!isValidId(userId)) {
       throw { statusCode: 400, message: 'ID do usuário inválido' }
@@ -96,7 +101,12 @@ export class BetService {
 
     this.verificarPrazo(game.data_hora)
 
-    return await this.betRepository.update(id, palpite)
+    return await this.betRepository.update(
+      id,
+      userId,
+      palpite,
+      usarCartaDobroPontos
+    )
   }
 
   async listBetsByUser(userId: string): Promise<IBetFull[]> {

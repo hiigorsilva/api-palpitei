@@ -64,6 +64,7 @@ const editBetBodySchema = z.object({
   palpite: z.enum(['A', 'B', 'EMPATE'], {
     error: 'Palpite inválido. Informe os valores corretos: A, B ou EMPATE',
   }),
+  usar_carta_dobro_pontos: z.boolean().optional(),
 })
 
 const createBetParamsSchema = z.object({
@@ -102,7 +103,7 @@ export const editBetSchema: RouteShorthandOptions = {
   schema: {
     summary: 'Edita aposta existente',
     description:
-      'Altera o palpite de uma aposta. Só permite se jogo ainda não começou.',
+      'Altera o palpite e, opcionalmente, o uso da carta de dobro de pontos. Só permite se jogo ainda não começou.',
     tags: ['Apostas'],
     params: editBetParamsSchema,
     body: editBetBodySchema,

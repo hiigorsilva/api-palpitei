@@ -1,4 +1,4 @@
-import { desc, eq, sql } from 'drizzle-orm'
+import { asc, desc, eq, sql } from 'drizzle-orm'
 import { db } from '../../../db/connection'
 import { championBets } from '../../../db/schemas/champion-bets'
 import { ranking } from '../../../db/schemas/ranking'
@@ -36,7 +36,19 @@ export class RankingRepository implements IRankingRepository {
       .select(this.selectRankingFields())
       .from(users)
       .leftJoin(ranking, eq(users.id, ranking.userId))
-      .orderBy(desc(sql`COALESCE(${ranking.pontos_total}, 0)`))
+      .orderBy(
+        desc(sql`COALESCE(${ranking.pontos_total}, 0)`),
+        desc(sql`COALESCE(${ranking.pontos_apostas}, 0)`),
+        desc(sql`COALESCE(${ranking.acertos}, 0)`),
+        desc(sql`
+          CASE 
+            WHEN COALESCE(${ranking.total_apostas}, 0) > 0 
+            THEN ROUND((COALESCE(${ranking.acertos}, 0)::DECIMAL / ${ranking.total_apostas}) * 100, 1)
+            ELSE 0
+          END
+        `),
+        asc(users.name)
+      )
 
     // Adicionar posição manualmente
     return result.map((item, index) => ({
