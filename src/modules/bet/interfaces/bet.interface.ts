@@ -35,6 +35,7 @@ export const CreateBetDTOSchema = z.object({
 
 export const EditBetDTOSchema = z.object({
   palpite: palpiteSchema,
+  usar_carta_dobro_pontos: z.boolean().optional(),
 })
 
 export type CreateBetDTO = z.infer<typeof CreateBetDTOSchema>
@@ -53,7 +54,12 @@ export interface IBetRepository {
     palpite: Palpite,
     usarCartaDobroPontos?: boolean
   ): Promise<IBet>
-  update(id: number, palpite: Palpite): Promise<IBet>
+  update(
+    id: number,
+    userId: string,
+    palpite: Palpite,
+    usarCartaDobroPontos?: boolean
+  ): Promise<IBet>
   getById(id: number): Promise<IBet | null>
   getByUser(userId: string): Promise<IBetFull[]>
   getByGame(gameId: string): Promise<IBet[]>
@@ -72,6 +78,11 @@ export interface IBetService {
     palpite: Palpite,
     usarCartaDobroPontos?: boolean
   ): Promise<IBet>
-  editBet(id: number, userId: string, palpite: Palpite): Promise<IBet>
+  editBet(
+    id: number,
+    userId: string,
+    palpite: Palpite,
+    usarCartaDobroPontos?: boolean
+  ): Promise<IBet>
   listBetsByUser(userId: string): Promise<IBetFull[]>
 }

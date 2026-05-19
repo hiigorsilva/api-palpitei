@@ -58,7 +58,8 @@ export class BetController {
     const bet = await this.betService.editBet(
       params.id,
       params.userId,
-      body.palpite
+      body.palpite,
+      body.usar_carta_dobro_pontos
     )
 
     return reply.status(200).send(bet)
