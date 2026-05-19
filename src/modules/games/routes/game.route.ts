@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import { gameController } from '../instances/user.instance'
 import {
   getGameByIdSchema,
+  listBetsByGameSchema,
   listGamesSchema,
   listPendingGamesSchema,
   listTodayGamesSchema,
@@ -22,5 +23,9 @@ export async function gameRoute(app: FastifyInstance) {
 
   app.get('/games/:id', getGameByIdSchema, (request, reply) =>
     gameController.getById(request, reply)
+  )
+
+  app.get('/games/:gameId/bets', listBetsByGameSchema, (request, reply) =>
+    gameController.listBetsByGame(request, reply)
   )
 }

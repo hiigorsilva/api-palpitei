@@ -9,17 +9,33 @@ const paramsSchema = z.object({
 })
 type GetGameByIdParams = z.infer<typeof paramsSchema>
 
-const querySchema = z.object({
+const requiredUserQuerySchema = z.object({
+  userId: z
+    .string({ error: 'ID do usuário é obrigatório' })
+    .uuid('ID do usuário inválido'),
+})
+
+const optionalUserQuerySchema = z.object({
+  userId: z.string().uuid().optional(),
+})
+
+const listQuerySchema = z.object({
   fase: GameFaseSchema.optional(),
   status: GameStatusSchema.optional(),
-  userId: z.string().uuid().optional(),
+  userId: z
+    .string({ error: 'ID do usuário é obrigatório' })
+    .uuid('ID do usuário inválido'),
+})
+
+const betsParamsSchema = z.object({
+  gameId: z.string(),
 })
 
 export class GameController {
   constructor(private gameService: GameService) {}
 
   async listAll(request: FastifyRequest, reply: FastifyReply) {
-    const query = querySchema.parse(request.query)
+    const query = listQuerySchema.parse(request.query)
 
     if (query.fase && !faseOptions.includes(query.fase)) {
       return reply.status(404).send({ message: 'Fase não encontrada' })
@@ -50,20 +66,26 @@ export class GameController {
       return reply.status(400).send({ message: 'ID é obrigatório' })
     }
 
-    const query = querySchema.pick({ userId: true }).parse(request.query)
+    const query = requiredUserQuerySchema.parse(request.query)
     const game = await this.gameService.getById(params.id, query.userId)
     return reply.status(200).send(game)
   }
 
   async listPendentes(request: FastifyRequest, reply: FastifyReply) {
-    const query = querySchema.pick({ userId: true }).parse(request.query)
+    const query = optionalUserQuerySchema.parse(request.query)
     const games = await this.gameService.listPendentes(query.userId)
     return reply.status(200).send(games)
   }
 
   async listHoje(request: FastifyRequest, reply: FastifyReply) {
-    const query = querySchema.pick({ userId: true }).parse(request.query)
+    const query = requiredUserQuerySchema.parse(request.query)
     const games = await this.gameService.listHoje(query.userId)
     return reply.status(200).send(games)
+  }
+
+  async listBetsByGame(request: FastifyRequest, reply: FastifyReply) {
+    const params = betsParamsSchema.parse(request.params)
+    const bets = await this.gameService.listBetsByGame(params.gameId)
+    return reply.status(200).send(bets)
   }
 }

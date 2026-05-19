@@ -1,3 +1,5 @@
+import type { Palpite } from '../../bet/interfaces/bet.interface'
+
 export interface IUser {
   id: string
   name: string
@@ -31,6 +33,16 @@ export interface IChampionBetResponse {
   pontos: number
   created_at: Date
   updated_at: Date
+}
+
+export interface IUserCartaHistoricoResponse {
+  gameId: string
+  team_a: string
+  team_b: string
+  data_hora: string
+  palpite: Palpite
+  acertou: boolean
+  pontos: number
 }
 
 export interface IUserRepository {

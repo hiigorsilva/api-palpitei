@@ -3,6 +3,7 @@ import { userController } from '../instances/user.instance'
 import {
   chooseChampionBetSchema,
   createUserSchema,
+  getCartaHistoricoSchema,
   getUserByIdSchema,
   listUsersSchema,
   loginUserSchema,
@@ -31,5 +32,11 @@ export const userRoute = async (app: FastifyInstance) => {
     '/users/:userId/palpite-campeao',
     chooseChampionBetSchema,
     (request, reply) => userController.chooseChampionBet(request, reply)
+  )
+
+  app.get(
+    '/users/:userId/carta-historico',
+    getCartaHistoricoSchema,
+    (request, reply) => userController.getCartaHistorico(request, reply)
   )
 }

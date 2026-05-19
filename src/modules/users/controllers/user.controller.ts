@@ -17,6 +17,10 @@ type ChooseChampionBody = {
   teamId: string
 }
 
+type CartaHistoricoParams = {
+  userId: string
+}
+
 export class UserController {
   constructor(private userService: UserService) {}
 
@@ -51,5 +55,12 @@ export class UserController {
     const championBet = await this.userService.chooseChampionBet(userId, teamId)
 
     return reply.status(200).send(championBet)
+  }
+
+  async getCartaHistorico(request: FastifyRequest, reply: FastifyReply) {
+    const { userId } = request.params as CartaHistoricoParams
+    const historico = await this.userService.getCartaHistorico(userId)
+
+    return reply.status(200).send(historico)
   }
 }

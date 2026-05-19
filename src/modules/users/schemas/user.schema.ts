@@ -34,6 +34,16 @@ const championBetResponseSchema = z.object({
   updated_at: z.date().transform(date => date.toISOString()),
 })
 
+const cartaHistoricoResponseSchema = z.object({
+  gameId: z.string(),
+  team_a: z.string(),
+  team_b: z.string(),
+  data_hora: z.string().datetime(),
+  palpite: z.enum(['A', 'B', 'EMPATE']),
+  acertou: z.boolean(),
+  pontos: z.number(),
+})
+
 const errorResponseSchema = z.object({
   message: z.string(),
 })
@@ -119,6 +129,23 @@ export const chooseChampionBetSchema: RouteShorthandOptions = {
     response: {
       200: championBetResponseSchema,
       400: errorResponseSchema,
+      404: errorResponseSchema,
+      500: errorResponseSchema,
+    },
+  },
+}
+
+export const getCartaHistoricoSchema: RouteShorthandOptions = {
+  schema: {
+    summary: 'Histórico de uso da carta dobro pontos',
+    description:
+      'Retorna apenas as apostas em que o usuário utilizou a carta dobro pontos.',
+    tags: ['Usuários'],
+    params: z.object({
+      userId: z.string().uuid('ID do usuário inválido'),
+    }),
+    response: {
+      200: z.array(cartaHistoricoResponseSchema),
       404: errorResponseSchema,
       500: errorResponseSchema,
     },
