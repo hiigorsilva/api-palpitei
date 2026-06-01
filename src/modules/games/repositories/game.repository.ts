@@ -81,6 +81,12 @@ export class GameRepository implements IGameRepository {
           where ${bet.gameId} = ${games.id}
             and ${bet.userId} = ${effectiveUserId}
         )`,
+        usou_carta_dobro_pontos: sql<boolean>`exists (
+          select 1 from ${bet}
+          where ${bet.gameId} = ${games.id}
+            and ${bet.userId} = ${effectiveUserId}
+            and ${bet.usou_carta_dobro_pontos} = true
+        )`,
         created_at: games.created_at,
         updated_at: games.updated_at,
         team_a_id: this.teamA.id,
@@ -160,6 +166,7 @@ export class GameRepository implements IGameRepository {
       gols_b: data.gols_b,
       finish_game: data.finish_game,
       has_palpite: data.has_palpite,
+      usou_carta_dobro_pontos: data.usou_carta_dobro_pontos,
       created_at: data.created_at,
       updated_at: data.updated_at,
     }

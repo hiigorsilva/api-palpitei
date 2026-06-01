@@ -40,6 +40,7 @@ const cartaHistoricoResponseSchema = z.object({
   team_b: z.string(),
   data_hora: z.string().datetime(),
   palpite: z.enum(['A', 'B', 'EMPATE']),
+  usou_carta_dobro_pontos: z.boolean(),
   acertou: z.boolean(),
   pontos: z.number(),
 })

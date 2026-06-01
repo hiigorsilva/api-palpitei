@@ -207,101 +207,65 @@ export class BetRepository implements IBetRepository {
     usarCartaDobroPontos?: boolean
   ): Promise<IBet> {
     return await db.transaction(async tx => {
-      if (usarCartaDobroPontos === true) {
-        const changedBet = await tx
-          .update(bet)
-          .set({
-            palpite,
-            usou_carta_dobro_pontos: true,
-            updated_at: new Date(),
-          })
-          .where(and(eq(bet.id, id), eq(bet.usou_carta_dobro_pontos, false)))
-          .returning({ id: bet.id })
+      const existingBet = await tx
+        .select({ usou_carta_dobro_pontos: bet.usou_carta_dobro_pontos })
+        .from(bet)
+        .where(eq(bet.id, id))
 
-        if (changedBet[0]) {
-          const updatedUser = await tx
-            .update(users)
-            .set({
-              carta_dobro_pontos: sql`${users.carta_dobro_pontos} - 1`,
-            })
-            .where(
-              and(eq(users.id, userId), sql`${users.carta_dobro_pontos} > 0`)
-            )
-            .returning({ id: users.id })
-
-          if (!updatedUser[0]) {
-            throw {
-              statusCode: 400,
-              message: 'Você não possui cartas de dobro de pontos disponíveis.',
-            }
-          }
-        }
-
-        const result = await tx
-          .update(bet)
-          .set({
-            palpite,
-            usou_carta_dobro_pontos: true,
-            updated_at: new Date(),
-          })
-          .where(eq(bet.id, id))
-          .returning()
-
-        const updatedUser = await tx
-          .select({ carta_dobro_pontos: users.carta_dobro_pontos })
-          .from(users)
-          .where(eq(users.id, userId))
-
-        return this.toIBet({
-          ...result[0],
-          carta_dobro_pontos: updatedUser[0]?.carta_dobro_pontos,
-        })
+      if (!existingBet[0]) {
+        throw { statusCode: 404, message: 'Aposta não encontrada' }
       }
 
-      if (usarCartaDobroPontos === false) {
-        const changedBet = await tx
-          .update(bet)
-          .set({
-            palpite,
-            usou_carta_dobro_pontos: false,
-            updated_at: new Date(),
-          })
-          .where(and(eq(bet.id, id), eq(bet.usou_carta_dobro_pontos, true)))
-          .returning({ id: bet.id })
-
-        if (changedBet[0]) {
-          await tx
-            .update(users)
-            .set({
-              carta_dobro_pontos: sql`${users.carta_dobro_pontos} + 1`,
-            })
-            .where(eq(users.id, userId))
-        }
-
-        const result = await tx
-          .update(bet)
-          .set({
-            palpite,
-            usou_carta_dobro_pontos: false,
-            updated_at: new Date(),
-          })
-          .where(eq(bet.id, id))
-          .returning()
-
+      if (
+        usarCartaDobroPontos === true &&
+        !existingBet[0].usou_carta_dobro_pontos
+      ) {
         const updatedUser = await tx
-          .select({ carta_dobro_pontos: users.carta_dobro_pontos })
-          .from(users)
-          .where(eq(users.id, userId))
+          .update(users)
+          .set({
+            carta_dobro_pontos: sql`${users.carta_dobro_pontos} - 1`,
+          })
+          .where(
+            and(eq(users.id, userId), sql`${users.carta_dobro_pontos} > 0`)
+          )
+          .returning({ id: users.id })
 
-        return this.toIBet({
-          ...result[0],
-          carta_dobro_pontos: updatedUser[0]?.carta_dobro_pontos,
-        })
+        if (!updatedUser[0]) {
+          throw {
+            statusCode: 400,
+            message: 'Você não possui cartas de dobro de pontos disponíveis.',
+          }
+        }
+      }
+
+      if (
+        usarCartaDobroPontos === false &&
+        existingBet[0].usou_carta_dobro_pontos
+      ) {
+        await tx
+          .update(users)
+          .set({
+            carta_dobro_pontos: sql`${users.carta_dobro_pontos} + 1`,
+          })
+          .where(eq(users.id, userId))
+      }
+
+      const updateData: {
+        palpite: Palpite
+        updated_at: Date
+        usou_carta_dobro_pontos?: boolean
+      } = {
+        palpite,
+        updated_at: new Date(),
+      }
+
+      if (usarCartaDobroPontos !== undefined) {
+        updateData.usou_carta_dobro_pontos = usarCartaDobroPontos
       }
 
       const result = await tx
         .update(bet)
-        .set({ palpite, updated_at: new Date() })
+        .set(updateData)
         .where(eq(bet.id, id))
         .returning()
 
@@ -411,6 +375,7 @@ export class BetRepository implements IBetRepository {
         team_b: games.team_b,
         data_hora: games.data_hora,
         palpite: bet.palpite,
+        usou_carta_dobro_pontos: bet.usou_carta_dobro_pontos,
         acertou: bet.acertou,
         pontos: bet.pontos,
       })
@@ -425,6 +390,7 @@ export class BetRepository implements IBetRepository {
       team_b: item.team_b,
       data_hora: item.data_hora.toISOString(),
       palpite: palpiteSchema.parse(item.palpite),
+      usou_carta_dobro_pontos: item.usou_carta_dobro_pontos,
       acertou: item.acertou ?? false,
       pontos: item.pontos,
     }))

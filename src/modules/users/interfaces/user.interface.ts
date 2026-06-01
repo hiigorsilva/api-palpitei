@@ -41,6 +41,7 @@ export interface IUserCartaHistoricoResponse {
   team_b: string
   data_hora: string
   palpite: Palpite
+  usou_carta_dobro_pontos: boolean
   acertou: boolean
   pontos: number
 }

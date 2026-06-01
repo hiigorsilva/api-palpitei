@@ -14,6 +14,7 @@ export interface IGame {
   gols_b: number | null
   finish_game: boolean
   has_palpite: boolean
+  usou_carta_dobro_pontos: boolean
   created_at: Date
   updated_at: Date
 }

@@ -37,6 +37,7 @@ const gameResponseSchema = z.object({
   gols_b: z.number().nullable(),
   finish_game: z.boolean(),
   has_palpite: z.boolean(),
+  usou_carta_dobro_pontos: z.boolean(),
   created_at: z.union([z.string().datetime(), z.date()]),
   updated_at: z.union([z.string().datetime(), z.date()]),
 })
