@@ -1,6 +1,7 @@
 {
   "name": "api-palpitei",
   "version": "1.0.0",
+  "packageManager": "pnpm@11.5.0",
   "main": "src/server.ts",
   "scripts": {
     "start": "node --env-file=.env dist/src/server.js",
